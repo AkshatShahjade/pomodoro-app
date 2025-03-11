@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">Pomodoro App</string>
+    <string name="pomodoro_timer">Pomodoro Timer</string>
+    <string name="statistics">Statistics</string>
+    <string name="back_up">Back-Up</string>
+    <string name="settings">Settings</string>
+    <string name="about">About</string>
+</resources>
