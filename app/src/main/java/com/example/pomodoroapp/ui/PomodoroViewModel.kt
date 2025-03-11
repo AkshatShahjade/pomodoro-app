@@ -1,4 +1,4 @@
-package com.example.pomodoroapp.ui.homescreen
+package com.example.pomodoroapp.ui
 
 import androidx.lifecycle.ViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -9,13 +9,13 @@ import kotlin.time.Duration
 import kotlin.time.Duration.Companion.minutes
 import kotlin.time.Duration.Companion.seconds
 
-class HomeViewModel: ViewModel() {
-    private val _uiState: MutableStateFlow<HomeUiState> = MutableStateFlow(HomeUiState())
-    val uiState: StateFlow<HomeUiState> = _uiState.asStateFlow()
+class PomodoroViewModel: ViewModel() {
+    private val _uiState: MutableStateFlow<PomodoroUiState> = MutableStateFlow(PomodoroUiState())
+    val uiState: StateFlow<PomodoroUiState> = _uiState.asStateFlow()
     val startTimer = "2s"
 
     init{
-        _uiState.value = HomeUiState(timer = startTimer) // change to timer settings value
+        _uiState.value = PomodoroUiState(timer = startTimer) // change to timer settings value
     }
 
     fun toggleTimer(){

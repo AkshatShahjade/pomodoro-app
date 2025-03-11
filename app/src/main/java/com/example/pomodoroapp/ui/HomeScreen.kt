@@ -1,8 +1,6 @@
-package com.example.pomodoroapp.ui.homescreen
+package com.example.pomodoroapp.ui
 
-import android.app.Activity
 import android.util.Log
-import androidx.activity.compose.LocalActivity
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
@@ -44,7 +42,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -53,13 +50,12 @@ import com.example.pomodoroapp.R
 import com.example.pomodoroapp.ui.theme.PomodoroAppTheme
 import kotlinx.coroutines.delay
 import kotlin.time.Duration
-import kotlin.time.Duration.Companion.seconds
 
 private const val TAG = "HOMESCREEN"
 
 @Composable
-fun HomeScreen(homeViewModel: HomeViewModel = viewModel()){
-    val homeUiState by homeViewModel.uiState.collectAsState()
+fun HomeScreen(pomodoroViewModel: PomodoroViewModel = viewModel()){
+    val pomodoroUiState by pomodoroViewModel.uiState.collectAsState()
     var menuVisible by rememberSaveable { mutableStateOf(false) }
 
     Column(
@@ -69,11 +65,11 @@ fun HomeScreen(homeViewModel: HomeViewModel = viewModel()){
         Spacer(Modifier.weight(1.1f))
 
         HomePageTimer(modifier = Modifier,
-            timerRunning = homeUiState.isTimerRunning,
-            timer = homeUiState.timer,
-            decreaseTimer = homeViewModel::decreaseTimer,
-            onTimerClick = homeViewModel::toggleTimer,
-            onTimerEnd = homeViewModel::timerEnd,
+            timerRunning = pomodoroUiState.isTimerRunning,
+            timer = pomodoroUiState.timer,
+            decreaseTimer = pomodoroViewModel::decreaseTimer,
+            onTimerClick = pomodoroViewModel::toggleTimer,
+            onTimerEnd = pomodoroViewModel::timerEnd,
         )
 
         Spacer(Modifier.weight(1f))
@@ -89,18 +85,18 @@ fun HomeScreen(homeViewModel: HomeViewModel = viewModel()){
         ) {
             if (menuVisible) {
                 Menu(modifier = Modifier,
-                    statisticsLambda = homeViewModel::statisticsLambda,
-                    infoLambda = homeViewModel::infoLambda,
-                    settingsLambda = homeViewModel::settingsLambda,
-                    backupLambda = homeViewModel::backupLambda,
+                    statisticsLambda = pomodoroViewModel::statisticsLambda,
+                    infoLambda = pomodoroViewModel::infoLambda,
+                    settingsLambda = pomodoroViewModel::settingsLambda,
+                    backupLambda = pomodoroViewModel::backupLambda,
                 )
             }
         }
         BottomHomePageRow({menuVisible = !menuVisible})
-        if (homeUiState.isTimerEnded) {
+        if (pomodoroUiState.isTimerEnded) {
             TimerDialog(
-                onStartNext = homeViewModel::startNextTimer,
-                onExtend1min = homeViewModel::extendTimer1min
+                onStartNext = pomodoroViewModel::startNextTimer,
+                onExtend1min = pomodoroViewModel::extendTimer1min
             )
         }
     }
