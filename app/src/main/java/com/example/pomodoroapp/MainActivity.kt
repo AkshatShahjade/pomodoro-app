@@ -2,6 +2,7 @@ package com.example.pomodoroapp
 
 import android.os.Bundle
 import android.util.Log
+import android.view.WindowManager
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -61,6 +62,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
 
+
         setContent {
             val navController: NavHostController = rememberNavController()
 
@@ -71,7 +73,15 @@ class MainActivity : ComponentActivity() {
 
             val pomodoroViewModel: PomodoroViewModel = viewModel()
             val pomodoroUiState by pomodoroViewModel.uiState.collectAsState()
+
             pomodoroViewModel.setColorModeOnce(isSystemInDarkTheme()) // Set Color Mode to system default
+
+            if(pomodoroUiState.keepScreenOn) {
+                window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+            } else {
+                window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+            }
+
 
             // should I use whileloopp?
             LaunchedEffect(pomodoroUiState.isTimerRunning, pomodoroUiState.timer) {

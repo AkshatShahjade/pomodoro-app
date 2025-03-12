@@ -103,11 +103,6 @@ class PomodoroViewModel: ViewModel() {
         ) }
     }
 
-    fun toggleDarkMode(){
-        _uiState.update{ it.copy(
-            inDarkMode = !_uiState.value.inDarkMode
-        )}
-    }
     var counter = 0
     fun setColorModeOnce(inDarkMode: Boolean){
         if(counter==0) {
@@ -118,5 +113,15 @@ class PomodoroViewModel: ViewModel() {
             }
             counter++
         }
+    }
+    fun toggleDarkMode(){
+        _uiState.update{ it.copy(
+            inDarkMode = !_uiState.value.inDarkMode
+        )}
+    }
+    fun toggleKeepScreenOn(){
+        _uiState.update{ it.copy(
+            keepScreenOn = !_uiState.value.keepScreenOn
+        )}
     }
 }

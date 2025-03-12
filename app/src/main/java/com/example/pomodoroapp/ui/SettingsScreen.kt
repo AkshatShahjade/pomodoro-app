@@ -77,7 +77,8 @@ fun SettingsScreen(modifier: Modifier = Modifier,
                     modifier = Modifier,
                     title = stringResource(R.string.keep_the_screen_on),
                     isSwitch = false,
-                    value = false,
+                    value = pomodoroUiState.keepScreenOn,
+                    onClick = pomodoroViewModel::toggleKeepScreenOn,
                 )
             }
             item {
