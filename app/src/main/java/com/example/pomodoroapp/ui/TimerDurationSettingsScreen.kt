@@ -1,5 +1,9 @@
 package com.example.pomodoroapp.ui
 
+import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.spring
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
@@ -39,6 +43,7 @@ fun TimerDurationSettingsScreen(
 
     val currentTimerProfile = pomodoroUiState.timerProfile
 
+    //TODO: Animate:
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -75,21 +80,31 @@ fun TimerDurationSettingsScreen(
             onClick = pomodoroViewModel::updateLongBreaksOn
         )
 
-        if(currentTimerProfile.longBreaksOn){
-            SliderSettingItem(
-                modifier = Modifier,
-                title = "Long Break Duration",
-                valueRange = DataSource.breakDurationLimits,
-                value = currentTimerProfile.longBreakDuration,
-                onSliderValueChange = pomodoroViewModel::updateLongBreakDuration
+        Column(
+            modifier = Modifier.animateContentSize(
+                animationSpec = spring(
+                    dampingRatio = Spring.DampingRatioMediumBouncy,
+                    stiffness = Spring.StiffnessMedium
+                )
             )
-            SliderSettingItem(
-                modifier = Modifier,
-                title = "Sessions before a long break",
-                valueRange = DataSource.sessionsBeforeLongBreakLimits,
-                value = currentTimerProfile.sessionsBeforeLongBreak,
-                onSliderValueChange = pomodoroViewModel::updateSessionsBeforeLongBreak
-            )
+        )
+        {
+            if (currentTimerProfile.longBreaksOn) {
+                SliderSettingItem(
+                    modifier = Modifier,
+                    title = "Long Break Duration",
+                    valueRange = DataSource.breakDurationLimits,
+                    value = currentTimerProfile.longBreakDuration,
+                    onSliderValueChange = pomodoroViewModel::updateLongBreakDuration
+                )
+                SliderSettingItem(
+                    modifier = Modifier,
+                    title = "Sessions before a long break",
+                    valueRange = DataSource.sessionsBeforeLongBreakLimits,
+                    value = currentTimerProfile.sessionsBeforeLongBreak,
+                    onSliderValueChange = pomodoroViewModel::updateSessionsBeforeLongBreak
+                )
+            }
         }
     }
 }
