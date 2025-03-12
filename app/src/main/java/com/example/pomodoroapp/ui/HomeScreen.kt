@@ -54,8 +54,15 @@ import kotlin.time.Duration
 private const val TAG = "HOMESCREEN"
 
 @Composable
-fun HomeScreen(pomodoroViewModel: PomodoroViewModel = viewModel()){
-    val pomodoroUiState by pomodoroViewModel.uiState.collectAsState()
+fun HomeScreen(modifier: Modifier = Modifier,
+               pomodoroViewModel: PomodoroViewModel = viewModel(),
+               pomodoroUiState: PomodoroUiState,
+               onSettingsClick: ()->Unit={},
+               onInfoClick: ()->Unit={},
+               onBackupClick: ()->Unit={},
+               onStatisticsClick: ()->Unit={},
+   ){
+
     var menuVisible by rememberSaveable { mutableStateOf(false) }
 
     Column(
@@ -85,10 +92,10 @@ fun HomeScreen(pomodoroViewModel: PomodoroViewModel = viewModel()){
         ) {
             if (menuVisible) {
                 Menu(modifier = Modifier,
-                    statisticsLambda = pomodoroViewModel::statisticsLambda,
-                    infoLambda = pomodoroViewModel::infoLambda,
-                    settingsLambda = pomodoroViewModel::settingsLambda,
-                    backupLambda = pomodoroViewModel::backupLambda,
+                    statisticsLambda = onStatisticsClick,
+                    infoLambda = onInfoClick,
+                    settingsLambda = onSettingsClick,
+                    backupLambda = onBackupClick,
                 )
             }
         }
@@ -197,7 +204,7 @@ fun PreviewDark(){
         Surface(
             modifier = Modifier.fillMaxSize()
         ){
-            HomeScreen()
+//            HomeScreen()
 //            HomePage(startTime = "25m")
 //            Menu()
         }

@@ -5,4 +5,26 @@
     <string name="back_up">Back-Up</string>
     <string name="settings">Settings</string>
     <string name="about">About</string>
+    <string name="during_work_sessions">During Work Sessions</string>
+    <string name="click_to_grant_permission">Click to Grant Permission</string>
+    <string name="do_not_disturb_mode">Do Not Disturb Mode</string>
+    <string name="disable_sound_and_vibration">Disable Sound and Vibration</string>
+    <string name="autostart_break">Autostart Break</string>
+    <string name="autostart_work">Autostart Work</string>
+    <string name="notify_1_minute_before_work_session_ends">Notify 1 minute before work session ends</string>
+    <string name="pre_notification">Pre-notification</string>
+    <string name="set_notification_sound">Set Notification Sound</string>
+    <string name="finished_work_notification_sound">Finished Work Notification Sound</string>
+    <string name="finished_break_notification_sound">Finished Break Notification Sound</string>
+    <string name="repeat_the_notifications_until_cancelled">Repeat the notifications until cancelled</string>
+    <string name="insistent_notifications">Insistent Notifications</string>
+    <string name="notification_sound">Notification Sound</string>
+    <string name="notifications">Notifications</string>
+    <string name="dark_theme">Dark Theme</string>
+    <string name="fullscreen_mode">Fullscreen Mode</string>
+    <string name="keep_the_screen_on">Keep the screen on</string>
+    <string name="timer_duration_settings">Timer Duration Settings</string>
+    <string name="set_work_break_session_durations">Set Work,Break session durations</string>
+    <string name="general">General</string>
+    <string name="home_screen">Home Screen</string>
 </resources>

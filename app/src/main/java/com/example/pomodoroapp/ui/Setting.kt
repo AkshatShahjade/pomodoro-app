@@ -1,12 +1,15 @@
 package com.example.pomodoroapp.ui
 
-open class Setting (
-    val name: String,
-    val description: String = ""
-){}
+import androidx.annotation.DrawableRes
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.ImageVector
 
-class BoolSetting(name:String, description: String, default: Boolean) :
-    Setting(name = name, description = description)
-{
-
-}
+data class Setting (val modifier: Modifier = Modifier,
+                    val imageVector: ImageVector? = null,
+                    @DrawableRes val drawableRes: Int? = null,
+                    val title: String,
+                    val description: String? = null,
+                    val value:Any?=null,
+                    val isDisabled: Boolean = false,
+                    val onClick: ()->Unit = {},
+                    val isSwitch: Boolean = false)

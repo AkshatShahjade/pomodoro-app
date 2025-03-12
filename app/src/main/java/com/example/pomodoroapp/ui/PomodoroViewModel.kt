@@ -51,9 +51,4 @@ class PomodoroViewModel: ViewModel() {
         ) }
     }
 
-    fun statisticsLambda(){}
-    fun infoLambda(){}
-    fun backupLambda(){}
-    fun settingsLambda(){}
-
 }
