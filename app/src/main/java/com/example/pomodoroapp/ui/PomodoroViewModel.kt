@@ -1,11 +1,13 @@
 package com.example.pomodoroapp.ui
 
-import androidx.compose.foundation.isSystemInDarkTheme
+import android.content.Context
+import android.media.MediaPlayer
+import androidx.annotation.RawRes
 import androidx.lifecycle.ViewModel
+import com.example.pomodoroapp.data.Notification
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.timeout
 import kotlinx.coroutines.flow.update
 import kotlin.math.roundToInt
 import kotlin.time.Duration
@@ -20,20 +22,57 @@ class PomodoroViewModel: ViewModel() {
     init{
         // TODO: Change this to the saved profile value...
         _uiState.value = PomodoroUiState(
-            timer = _uiState.value.timerProfile.workDuration.minutes.toString()
+            timer = _uiState.value.timerProfile.workDuration.seconds.toString()
         )
     }
 
     fun toggleTimer(){
         _uiState.update { it.copy(isTimerRunning = !it.isTimerRunning) }
     }
-    fun timerEnd(){
+    fun timerEnd(context: Context) {
+        playNotification(context)
         _uiState.update { it.copy(
             isTimerRunning = false,
             isTimerEnded = true,
         ) }
     }
+
+
+    private fun playNotification(context: Context){
+        if (_uiState.value.notificationSoundOn) {
+            if(_uiState.value.insistentNotificationOn) {
+                playLoopedNotificationSound(context, _uiState.value.notificationSound.id)
+            } else {
+                playNotificationSound(context, _uiState.value.notificationSound.id)
+            }
+        }
+    }
+
+    private var mediaPlayer: MediaPlayer? = null
+
+    fun playNotificationSound(context: Context, @RawRes sound: Int) {
+        mediaPlayer = MediaPlayer.create(context, sound)
+        mediaPlayer?.start()
+    }
+
+    fun playLoopedNotificationSound(context: Context, @RawRes sound: Int) {
+        mediaPlayer = MediaPlayer.create(context, sound)
+        mediaPlayer?.isLooping=true
+        mediaPlayer?.start()
+    }
+
+    private fun stopSound() {
+        mediaPlayer?.let {
+            if (it.isPlaying) {
+                it.stop()
+                it.release()
+            }
+        }
+        mediaPlayer = null
+    }
+
     fun startNextTimer(){
+        stopSound()
         val _timerStage = _uiState.value.timerStage+1
         _uiState.update { it.copy(
             timerStage = _timerStage,
@@ -55,6 +94,7 @@ class PomodoroViewModel: ViewModel() {
         }
     }
     fun extendTimer1min(){
+        stopSound()
         _uiState.update { it.copy(
             timer = (Duration.parse(it.timer)+1.minutes).toString(),
             isTimerEnded = false,
@@ -114,6 +154,13 @@ class PomodoroViewModel: ViewModel() {
             counter++
         }
     }
+    fun updateNotificationSound(newNotification: Notification?){
+        if(newNotification != null){
+            _uiState.update { it.copy(
+                notificationSound = newNotification
+            ) }
+        }
+    }
     fun toggleDarkMode(){
         _uiState.update{ it.copy(
             inDarkMode = !_uiState.value.inDarkMode
@@ -124,4 +171,29 @@ class PomodoroViewModel: ViewModel() {
             keepScreenOn = !_uiState.value.keepScreenOn
         )}
     }
+    fun toggleInsistentNotificationOn(){
+        _uiState.update{ it.copy(
+            insistentNotificationOn = !_uiState.value.insistentNotificationOn
+        )}
+    }
+    fun toggleNotificationSoundOn(){
+        _uiState.update{ it.copy(
+            notificationSoundOn = !_uiState.value.notificationSoundOn
+        )}
+    }
+    fun toggleNotificationVibrationOn() {
+        _uiState.update {
+            it.copy(
+                notificationVibrationOn = !_uiState.value.notificationVibrationOn
+            )
+        }
+    }
+    fun toggleNotificationFlashOn() {
+        _uiState.update {
+            it.copy(
+                notificationFlashOn = !_uiState.value.notificationFlashOn
+            )
+        }
+    }
+
 }

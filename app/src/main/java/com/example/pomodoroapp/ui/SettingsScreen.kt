@@ -1,42 +1,50 @@
 package com.example.pomodoroapp.ui
 
+import android.content.Context
 import androidx.annotation.DrawableRes
+import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.spring
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Email
+import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Checkbox
-import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Slider
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableDoubleStateOf
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.dimensionResource
-import androidx.compose.ui.res.integerResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
 import com.example.pomodoroapp.R
+import com.example.pomodoroapp.data.DataSource
+import com.example.pomodoroapp.data.Notification
 import com.example.pomodoroapp.ui.theme.PomodoroAppTheme
 
 @Composable
@@ -44,12 +52,12 @@ fun SettingsScreen(modifier: Modifier = Modifier,
                    onTimerDurationSettingsClick: ()->Unit = {},
                    pomodoroUiState: PomodoroUiState,
                    pomodoroViewModel: PomodoroViewModel,){
-    PomodoroAppTheme (darkTheme = true){ // temp
+
         // TODO: The adaptive arrangement of the row elements aren't ideal, currently using weight for them, but will need to change...
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(dimensionResource(R.dimen.padding_small)),
+                .padding(dimensionResource(R.dimen.padding_small))
         ) {
             item{
 //                HorizontalDivider(
@@ -61,7 +69,6 @@ fun SettingsScreen(modifier: Modifier = Modifier,
                     style = MaterialTheme.typography.titleMedium
                 )
             }
-
             item {
                 SettingMenuItem(
                     modifier = Modifier,
@@ -71,7 +78,6 @@ fun SettingsScreen(modifier: Modifier = Modifier,
                     onClick = onTimerDurationSettingsClick,
                 )
             }
-
             item {
                 SettingMenuItem(
                     modifier = Modifier,
@@ -109,12 +115,109 @@ fun SettingsScreen(modifier: Modifier = Modifier,
                 )
             }
             item {
-                SettingMenuItem(
-                    modifier = Modifier,
-                    title = stringResource(R.string.notification_sound),
-                    isSwitch = true,
-                    value = true,
-                )
+                val soundOn = pomodoroUiState.notificationSoundOn
+                Column(
+                    modifier = Modifier.animateContentSize(
+                        animationSpec = spring(
+                            dampingRatio = Spring.DampingRatioMediumBouncy,
+                            stiffness = Spring.StiffnessMedium,
+                        )
+                    ),
+                ) {
+                    SettingMenuItem(
+                        modifier = Modifier,
+                        title = stringResource(R.string.sound_enabled),
+                        isSwitch = true,
+                        value = soundOn,
+                        onClick = pomodoroViewModel::toggleNotificationSoundOn
+                    )
+                    if (soundOn) {
+                        var dialogVisible by rememberSaveable { mutableStateOf(false) }
+                        SettingMenuItem(
+                            modifier = Modifier.padding(start = dimensionResource(R.dimen.padding_medium)),
+                            //                    title = stringResource(R.string.finished_work_notification_sound),
+                            title = stringResource(R.string.notification_sound),
+                            description = stringResource(R.string.set_notification_sound),
+                            onClick = {dialogVisible = !dialogVisible}
+                        )
+                        if(dialogVisible) {
+                            Dialog(
+                                onDismissRequest = {dialogVisible = false}
+                            ) {
+                                Column(
+                                    modifier = Modifier
+                                        .background(
+                                            color = MaterialTheme.colorScheme.surface,
+                                            shape = MaterialTheme.shapes.large
+                                        )
+                                        .padding(dimensionResource(R.dimen.padding_medium))
+                                ) {
+                                    Text(
+                                        modifier = Modifier.padding(dimensionResource(R.dimen.padding_small)),
+                                        text = stringResource(R.string.notification_sound),
+                                        style = MaterialTheme.typography.titleLarge
+                                    )
+
+                                    var selectedNotification: Notification by rememberSaveable{
+                                        mutableStateOf(pomodoroUiState.notificationSound) }
+
+                                    LazyColumn(
+                                        modifier = Modifier.heightIn(max = 250.dp)
+                                    ) {
+                                        items(DataSource.notificationSoundsList) { notification ->
+                                            NotificationDialogItem(
+                                                modifier = Modifier.background(
+                                                    color = if(notification == selectedNotification && pomodoroUiState.inDarkMode)
+                                                        MaterialTheme.colorScheme.surfaceBright
+                                                    else if (notification == selectedNotification && !pomodoroUiState.inDarkMode)
+                                                        MaterialTheme.colorScheme.surfaceDim
+                                                    else MaterialTheme.colorScheme.surface
+                                                ),
+                                                notification = notification,
+                                                context = LocalContext.current,
+                                                onClick = {
+                                                    selectedNotification = notification
+                                                }
+                                            )
+                                        }
+                                    }
+                                    Row(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        horizontalArrangement = Arrangement.End
+                                    ){
+                                        TextButton(
+                                            modifier = Modifier.padding(horizontal =  dimensionResource(R.dimen.padding_small)),
+                                            onClick = {dialogVisible = false}
+                                        ){
+                                            Text(
+                                                text = "CANCEL"
+                                            )
+                                        }
+                                        TextButton(
+                                            modifier = Modifier.padding(horizontal =  dimensionResource(R.dimen.padding_small)),
+                                            onClick = {
+                                                pomodoroViewModel.updateNotificationSound(selectedNotification)
+                                                dialogVisible = false
+                                            }
+                                        ){
+                                            Text(
+                                                text = "OK"
+                                            )
+                                        }
+                                    }
+                                }
+                            }
+
+                        }
+                        //                    item{
+                        //                        SettingMenuItem(
+                        //                            modifier = Modifier,
+                        //                            title = stringResource(R.string.finished_break_notification_sound),
+                        //                            description = stringResource(R.string.set_notification_sound)
+                        //                        )
+                        //                    }
+                    }
+                }
             }
             item {
                 SettingMenuItem(
@@ -122,21 +225,8 @@ fun SettingsScreen(modifier: Modifier = Modifier,
                     title = stringResource(R.string.insistent_notifications),
                     description = stringResource(R.string.repeat_the_notifications_until_cancelled),
                     isSwitch = false,
-                    value = false,
-                )
-            }
-            item{
-                SettingMenuItem(
-                    modifier = Modifier,
-                    title = stringResource(R.string.finished_work_notification_sound),
-                    description = stringResource(R.string.set_notification_sound)
-                )
-            }
-            item{
-                SettingMenuItem(
-                    modifier = Modifier,
-                    title = stringResource(R.string.finished_break_notification_sound),
-                    description = stringResource(R.string.set_notification_sound)
+                    value = pomodoroUiState.insistentNotificationOn,
+                    onClick = pomodoroViewModel::toggleInsistentNotificationOn,
                 )
             }
             item {
@@ -144,7 +234,7 @@ fun SettingsScreen(modifier: Modifier = Modifier,
                     modifier = Modifier,
                     title = stringResource(R.string.pre_notification),
                     description = stringResource(R.string.notify_1_minute_before_work_session_ends),
-                    isSwitch = true,
+                    isSwitch = false,
                     value = false
                 )
             }
@@ -193,9 +283,42 @@ fun SettingsScreen(modifier: Modifier = Modifier,
                 )
             }
         }
+
     }
+
+@Preview(showBackground = true)
+@Composable
+fun NotPrev(){
+    NotificationDialogItem(notification = DataSource.notificationSoundsList[0], context = LocalContext.current)
 }
 
+@Composable
+fun NotificationDialogItem(modifier: Modifier = Modifier,
+                           notification: Notification,
+                           context: Context,
+                           onClick: () -> Unit ={},
+){
+    Row(
+        modifier = modifier.fillMaxWidth().clickable { onClick() },
+        verticalAlignment = Alignment.CenterVertically,
+    ){
+        IconButton (
+            modifier = Modifier,
+            onClick = {
+                PomodoroViewModel().playNotificationSound(context = context, notification.id)
+            }
+        ){
+            Icon(
+                imageVector = Icons.Filled.Notifications,
+                contentDescription = null
+            )
+        }
+        Text(
+            text = notification.name,
+            style = MaterialTheme.typography.bodyMedium
+        )
+    }
+}
 
 @Composable
 fun SettingMenuItem(modifier: Modifier = Modifier,
@@ -265,7 +388,8 @@ fun SettingMenuItem(modifier: Modifier = Modifier,
         if(value is Boolean){
             if(isSwitch){
                 Switch(
-                    modifier = Modifier.padding(dimensionResource(R.dimen.padding_medium))
+                    modifier = Modifier
+                        .padding(dimensionResource(R.dimen.padding_medium))
                         .weight(0.2f),
                     checked = value,
                     onCheckedChange = null,
@@ -273,7 +397,8 @@ fun SettingMenuItem(modifier: Modifier = Modifier,
             }
             else {
                 Checkbox(
-                    modifier = Modifier.padding(dimensionResource(R.dimen.padding_medium))
+                    modifier = Modifier
+                        .padding(dimensionResource(R.dimen.padding_medium))
                         .weight(0.2f),
                     checked = value,
                     onCheckedChange = null,

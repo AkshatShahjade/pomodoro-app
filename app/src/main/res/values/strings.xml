@@ -29,4 +29,5 @@
     <string name="home_screen">Home Screen</string>
     <string name="work_session_duration">Work Session Duration</string>
     <string name="break_session_duration">Break Session Duration</string>
+    <string name="sound_enabled">Sound Enabled</string>
 </resources>

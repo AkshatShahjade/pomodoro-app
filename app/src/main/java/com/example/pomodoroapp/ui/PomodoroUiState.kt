@@ -1,7 +1,8 @@
 package com.example.pomodoroapp.ui
 
-import androidx.compose.foundation.isSystemInDarkTheme
 import com.example.pomodoroapp.data.DataSource
+import com.example.pomodoroapp.data.Notification
+import com.example.pomodoroapp.data.TimerProfile
 
 data class PomodoroUiState(
     val timer: String = "25m",
@@ -13,5 +14,11 @@ data class PomodoroUiState(
     //TODO: Store these settings in memory so that the user doesn't have to re enter the settings each time
     val inDarkMode: Boolean = true,
     val keepScreenOn: Boolean = false,
+
+    val notificationSoundOn: Boolean = true,
+    val notificationSound: Notification = DataSource.notificationSoundsList[0],
+    val notificationVibrationOn: Boolean = true, // TODO: Maybe I can set it as enum with different settings like strong, light , SOS, etc.
+    val notificationFlashOn: Boolean = true,
+    val insistentNotificationOn: Boolean = true,
 )
 

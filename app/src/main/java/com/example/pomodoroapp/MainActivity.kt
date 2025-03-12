@@ -1,5 +1,7 @@
 package com.example.pomodoroapp
 
+import android.content.Context
+import android.media.MediaPlayer
 import android.os.Bundle
 import android.util.Log
 import android.view.WindowManager
@@ -64,6 +66,7 @@ class MainActivity : ComponentActivity() {
 
 
         setContent {
+            val context: Context = this
             val navController: NavHostController = rememberNavController()
 
             val currentRoute by navController.currentBackStackEntryAsState()
@@ -82,7 +85,6 @@ class MainActivity : ComponentActivity() {
                 window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
             }
 
-
             // should I use whileloopp?
             LaunchedEffect(pomodoroUiState.isTimerRunning, pomodoroUiState.timer) {
                 if (Duration.parse(pomodoroUiState.timer).inWholeSeconds > 0L
@@ -93,7 +95,7 @@ class MainActivity : ComponentActivity() {
                 }
                 else if(Duration.parse(pomodoroUiState.timer).inWholeSeconds <= 0L
                         && pomodoroUiState.isTimerRunning == true){
-                    pomodoroViewModel.timerEnd()
+                    pomodoroViewModel.timerEnd(context = context)
                     Log.d(TAG, "ended")
                 }
             }
