@@ -6,8 +6,11 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.annotation.StringRes
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.systemBars
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -82,7 +85,7 @@ class MainActivity : ComponentActivity() {
 
             PomodoroAppTheme {
                 Scaffold (
-                    modifier = Modifier.fillMaxSize(),
+                    modifier = Modifier.fillMaxSize().windowInsetsPadding(WindowInsets.systemBars),
                     topBar = {
                         if(navController.previousBackStackEntry!=null
                             && currentScreen != AppScreens.HomeScreen) {
@@ -95,14 +98,14 @@ class MainActivity : ComponentActivity() {
                 ){ innerPadding ->
 
                     NavHost(
-                        modifier = Modifier.fillMaxSize(),
+                        modifier = Modifier.fillMaxSize().padding(innerPadding),
                         navController = navController,
                         startDestination = AppScreens.HomeScreen.name,
                     ){
                         composable(AppScreens.HomeScreen.name)
                         {
                             HomeScreen(
-                                modifier = Modifier.padding(innerPadding),
+                                modifier = Modifier,
                                 pomodoroViewModel = pomodoroViewModel,
                                 pomodoroUiState = pomodoroUiState,
                                 onSettingsClick = {navController.navigate(AppScreens.SettingsScreen.name)}

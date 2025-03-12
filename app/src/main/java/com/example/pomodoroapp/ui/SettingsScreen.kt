@@ -3,6 +3,7 @@ package com.example.pomodoroapp.ui
 import androidx.annotation.DrawableRes
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -40,6 +41,7 @@ import com.example.pomodoroapp.ui.theme.PomodoroAppTheme
 @Composable
 fun SettingsScreen(modifier: Modifier = Modifier){
     PomodoroAppTheme (darkTheme = true){ // temp
+        // TODO: The adaptive arrangement of the row elements aren't ideal, currently using weight for them, but will need to change...
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
@@ -204,14 +206,15 @@ fun SettingMenuItem(modifier: Modifier = Modifier,
             .padding(dimensionResource(R.dimen.padding_small))
             .clickable { onClick() },
         verticalAlignment = Alignment.CenterVertically,
-
+//        horizontalArrangement = Arrangement.Absolute.SpaceBetween
     ) {
         //How to scale images so that height = height of column...?
         if(imageVector!=null){
             Image(
                 modifier = Modifier
                     .padding(dimensionResource(R.dimen.padding_small))
-                    .padding(end = dimensionResource(R.dimen.padding_small)),
+                    .padding(end = dimensionResource(R.dimen.padding_small))
+                    .weight(0.1f),
                 imageVector = imageVector,
                 contentDescription = null
             )
@@ -220,7 +223,8 @@ fun SettingMenuItem(modifier: Modifier = Modifier,
             Image(
                 modifier = Modifier
                     .padding(dimensionResource(R.dimen.padding_small))
-                    .padding(end = dimensionResource(R.dimen.padding_small)),
+                    .padding(end = dimensionResource(R.dimen.padding_small))
+                    .weight(0.1f),
                 painter = painterResource(drawableRes),
                 contentDescription = null
             )
@@ -229,6 +233,7 @@ fun SettingMenuItem(modifier: Modifier = Modifier,
             modifier = Modifier
                 .padding(dimensionResource(R.dimen.padding_small))
                 .padding(horizontal = dimensionResource(R.dimen.padding_small))
+                .weight(1f)
         ) {
             Text(
                 text = title,
@@ -248,18 +253,20 @@ fun SettingMenuItem(modifier: Modifier = Modifier,
             }
         }
 
-        Spacer(Modifier.weight(1f))
+//        Spacer(Modifier.weight(1f))
 
         if(value is Boolean){
             if(isSwitch){
                 Switch(
-                    modifier = Modifier.padding(dimensionResource(R.dimen.padding_medium)),
+                    modifier = Modifier.padding(dimensionResource(R.dimen.padding_medium))
+                        .weight(0.2f),
                     checked = value,
                     onCheckedChange = null,
                 )
             }else{
                 Checkbox(
-                    modifier = Modifier.padding(dimensionResource(R.dimen.padding_medium)),
+                    modifier = Modifier.padding(dimensionResource(R.dimen.padding_medium))
+                        .weight(0.2f),
                     checked = value,
                     onCheckedChange = null,
                 )
