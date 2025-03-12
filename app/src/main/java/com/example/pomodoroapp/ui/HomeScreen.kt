@@ -72,11 +72,8 @@ fun HomeScreen(modifier: Modifier = Modifier,
         Spacer(Modifier.weight(1.1f))
 
         HomePageTimer(modifier = Modifier,
-            timerRunning = pomodoroUiState.isTimerRunning,
             timer = pomodoroUiState.timer,
-            decreaseTimer = pomodoroViewModel::decreaseTimer,
             onTimerClick = pomodoroViewModel::toggleTimer,
-            onTimerEnd = pomodoroViewModel::timerEnd,
         )
 
         Spacer(Modifier.weight(1f))
@@ -111,24 +108,22 @@ fun HomeScreen(modifier: Modifier = Modifier,
 
 @Composable
 fun HomePageTimer(modifier: Modifier,
-                  timerRunning: Boolean,
                   timer: String,
-                  decreaseTimer: (Int)->Unit,
                   onTimerClick: ()->Unit,
-                  onTimerEnd: ()->Unit) {
+                  ) {
 
-// should I use whileloopp?
-    LaunchedEffect(timerRunning, timer) {
-        if (Duration.parse(timer).inWholeSeconds > 0L && timerRunning == true) {
-            delay(1000L) // Wait 1 second
-            Log.d(TAG, Duration.parse(timer).inWholeSeconds.toString())
-            decreaseTimer(1)
-        }
-        else if(Duration.parse(timer).inWholeSeconds <= 0L && timerRunning == true){
-            onTimerEnd()
-            Log.d(TAG, "ended")
-        }
-    }
+//    // should I use whileloopp?
+//    LaunchedEffect(timerRunning, timer) {
+//        if (Duration.parse(timer).inWholeSeconds > 0L && timerRunning == true) {
+//            delay(1000L) // Wait 1 second
+//            Log.d(TAG, Duration.parse(timer).inWholeSeconds.toString())
+//            decreaseTimer(1)
+//        }
+//        else if(Duration.parse(timer).inWholeSeconds <= 0L && timerRunning == true){
+//            onTimerEnd()
+//            Log.d(TAG, "ended")
+//        }
+//    }
 
     TextButton(
         onClick = { onTimerClick() },

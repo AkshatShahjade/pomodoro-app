@@ -1,6 +1,7 @@
 package com.example.pomodoroapp
 
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -20,6 +21,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
@@ -37,11 +39,15 @@ import com.example.pomodoroapp.ui.HomeScreen
 import com.example.pomodoroapp.ui.PomodoroViewModel
 import com.example.pomodoroapp.ui.SettingsScreen
 import com.example.pomodoroapp.ui.theme.PomodoroAppTheme
+import kotlinx.coroutines.delay
+import kotlin.time.Duration
 
 enum class AppScreens(@StringRes val title: Int){
     HomeScreen(R.string.home_screen),
     SettingsScreen(R.string.settings)
 }
+
+private const val TAG = "MAIN_ACTIVTIY"
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -49,14 +55,32 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
 
         setContent {
+            val navController: NavHostController = rememberNavController()
+
+            val currentRoute by navController.currentBackStackEntryAsState()
+            val currentScreen = AppScreens.valueOf(
+                currentRoute?.destination?.route?:AppScreens.HomeScreen.name
+            )
+
+            val pomodoroViewModel: PomodoroViewModel = viewModel()
+            val pomodoroUiState by pomodoroViewModel.uiState.collectAsState()
+
+            // should I use whileloopp?
+            LaunchedEffect(pomodoroUiState.isTimerRunning, pomodoroUiState.timer) {
+                if (Duration.parse(pomodoroUiState.timer).inWholeSeconds > 0L
+                        && pomodoroUiState.isTimerRunning == true) {
+                    delay(1000L) // Wait 1 second
+                    Log.d(TAG, Duration.parse(pomodoroUiState.timer).inWholeSeconds.toString())
+                    pomodoroViewModel.decreaseTimer(1)
+                }
+                else if(Duration.parse(pomodoroUiState.timer).inWholeSeconds <= 0L
+                        && pomodoroUiState.isTimerRunning == true){
+                    pomodoroViewModel.timerEnd()
+                    Log.d(TAG, "ended")
+                }
+            }
+
             PomodoroAppTheme {
-                val navController: NavHostController = rememberNavController()
-
-                val currentRoute by navController.currentBackStackEntryAsState()
-                val currentScreen = AppScreens.valueOf(
-                    currentRoute?.destination?.route?:AppScreens.HomeScreen.name
-                )
-
                 Scaffold (
                     modifier = Modifier.fillMaxSize(),
                     topBar = {
@@ -69,9 +93,6 @@ class MainActivity : ComponentActivity() {
                         }
                     }
                 ){ innerPadding ->
-
-                    val pomodoroViewModel: PomodoroViewModel = viewModel()
-                    val pomodoroUiState by pomodoroViewModel.uiState.collectAsState()
 
                     NavHost(
                         modifier = Modifier.fillMaxSize(),
