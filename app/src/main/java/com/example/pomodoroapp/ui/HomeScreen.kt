@@ -6,6 +6,7 @@ import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectVerticalDragGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -42,6 +43,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -74,6 +76,7 @@ fun HomeScreen(modifier: Modifier = Modifier,
         HomePageTimer(modifier = Modifier,
             timer = pomodoroUiState.timer,
             onTimerClick = pomodoroViewModel::toggleTimer,
+            onTimerSwipeDown = pomodoroViewModel::startNextTimer,
         )
 
         Spacer(Modifier.weight(1f))
@@ -109,28 +112,31 @@ fun HomeScreen(modifier: Modifier = Modifier,
 @Composable
 fun HomePageTimer(modifier: Modifier,
                   timer: String,
-                  onTimerClick: ()->Unit,
+                  onTimerClick: () -> Unit,
+                  onTimerSwipeDown: () -> Unit
                   ) {
-
-//    // should I use whileloopp?
-//    LaunchedEffect(timerRunning, timer) {
-//        if (Duration.parse(timer).inWholeSeconds > 0L && timerRunning == true) {
-//            delay(1000L) // Wait 1 second
-//            Log.d(TAG, Duration.parse(timer).inWholeSeconds.toString())
-//            decreaseTimer(1)
-//        }
-//        else if(Duration.parse(timer).inWholeSeconds <= 0L && timerRunning == true){
-//            onTimerEnd()
-//            Log.d(TAG, "ended")
-//        }
-//    }
-
     TextButton(
         onClick = { onTimerClick() },
-        modifier = modifier
+        modifier = modifier.pointerInput(Unit) {
+            var totalDrag = 0f
+            detectVerticalDragGestures(
+                onDragEnd = {
+                    if(totalDrag>0f) {
+                        onTimerSwipeDown()
+                    }
+                    totalDrag = 0f
+                },
+                onDragStart = {},
+                onDragCancel = {},
+                onVerticalDrag = { _, dragAmount ->
+                    totalDrag = dragAmount
+                }
+            )
+        },
     ) {
         Text(
-            text = "%02d:%02d".format(
+            text = "%01d:%02d:%02d".format(
+                Duration.parse(timer).inWholeHours % 60,
                 Duration.parse(timer).inWholeMinutes % 60,
                 Duration.parse(timer).inWholeSeconds % 60
             ),

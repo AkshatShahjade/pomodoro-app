@@ -27,4 +27,6 @@
     <string name="set_work_break_session_durations">Set Work,Break session durations</string>
     <string name="general">General</string>
     <string name="home_screen">Home Screen</string>
+    <string name="work_session_duration">Work Session Duration</string>
+    <string name="break_session_duration">Break Session Duration</string>
 </resources>

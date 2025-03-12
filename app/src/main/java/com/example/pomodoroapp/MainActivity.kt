@@ -28,6 +28,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.ApproachMeasureScope
 import androidx.compose.ui.modifier.modifierLocalMapOf
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -41,13 +42,15 @@ import androidx.navigation.compose.rememberNavController
 import com.example.pomodoroapp.ui.HomeScreen
 import com.example.pomodoroapp.ui.PomodoroViewModel
 import com.example.pomodoroapp.ui.SettingsScreen
+import com.example.pomodoroapp.ui.TimerDurationSettingsScreen
 import com.example.pomodoroapp.ui.theme.PomodoroAppTheme
 import kotlinx.coroutines.delay
 import kotlin.time.Duration
 
 enum class AppScreens(@StringRes val title: Int){
     HomeScreen(R.string.home_screen),
-    SettingsScreen(R.string.settings)
+    SettingsScreen(R.string.settings),
+    TimerDurationSettingsScreen(R.string.timer_duration_settings),
 }
 
 private const val TAG = "MAIN_ACTIVTIY"
@@ -73,8 +76,8 @@ class MainActivity : ComponentActivity() {
                 if (Duration.parse(pomodoroUiState.timer).inWholeSeconds > 0L
                         && pomodoroUiState.isTimerRunning == true) {
                     delay(1000L) // Wait 1 second
-                    Log.d(TAG, Duration.parse(pomodoroUiState.timer).inWholeSeconds.toString())
                     pomodoroViewModel.decreaseTimer(1)
+                    Log.d(TAG, Duration.parse(pomodoroUiState.timer).inWholeSeconds.toString())
                 }
                 else if(Duration.parse(pomodoroUiState.timer).inWholeSeconds <= 0L
                         && pomodoroUiState.isTimerRunning == true){
@@ -115,8 +118,18 @@ class MainActivity : ComponentActivity() {
                         {
                             SettingsScreen(
                                 modifier = Modifier.padding(innerPadding),
-//                                pomodoroViewModel = pomodoroViewModel,
-//                                pomodoroUiState = pomodoroUiState
+                                onTimerDurationSettingsClick = {
+                                    navController.navigate(AppScreens.TimerDurationSettingsScreen.name)
+                                },
+                                pomodoroViewModel = pomodoroViewModel,
+                                pomodoroUiState = pomodoroUiState,
+                            )
+                        }
+                        composable(AppScreens.TimerDurationSettingsScreen.name){
+                            TimerDurationSettingsScreen(
+                                modifier = Modifier,
+                                pomodoroViewModel = pomodoroViewModel,
+                                pomodoroUiState = pomodoroUiState
                             )
                         }
 

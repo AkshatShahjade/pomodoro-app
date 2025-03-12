@@ -26,6 +26,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableDoubleStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -39,7 +40,10 @@ import com.example.pomodoroapp.R
 import com.example.pomodoroapp.ui.theme.PomodoroAppTheme
 
 @Composable
-fun SettingsScreen(modifier: Modifier = Modifier){
+fun SettingsScreen(modifier: Modifier = Modifier,
+                   onTimerDurationSettingsClick: ()->Unit = {},
+                   pomodoroUiState: PomodoroUiState? = null,
+                   pomodoroViewModel: PomodoroViewModel? = null,){
     PomodoroAppTheme (darkTheme = true){ // temp
         // TODO: The adaptive arrangement of the row elements aren't ideal, currently using weight for them, but will need to change...
         LazyColumn(
@@ -64,8 +68,8 @@ fun SettingsScreen(modifier: Modifier = Modifier){
                     imageVector = Icons.Filled.Settings,
                     title = stringResource(R.string.timer_duration_settings),
                     description = stringResource(R.string.set_work_break_session_durations),
-
-                    )
+                    onClick = onTimerDurationSettingsClick,
+                )
             }
 
             item {
@@ -190,6 +194,7 @@ fun SettingsScreen(modifier: Modifier = Modifier){
     }
 }
 
+
 @Composable
 fun SettingMenuItem(modifier: Modifier = Modifier,
                     imageVector: ImageVector? = null,
@@ -199,7 +204,7 @@ fun SettingMenuItem(modifier: Modifier = Modifier,
                     value:Any?=null,
                     isDisabled: Boolean = false,
                     onClick: ()->Unit = {},
-                    isSwitch: Boolean = false){
+                    isSwitch: Boolean = false,){
     Row(
         modifier = modifier
             .fillMaxWidth()
@@ -263,7 +268,8 @@ fun SettingMenuItem(modifier: Modifier = Modifier,
                     checked = value,
                     onCheckedChange = null,
                 )
-            }else{
+            }
+            else {
                 Checkbox(
                     modifier = Modifier.padding(dimensionResource(R.dimen.padding_medium))
                         .weight(0.2f),
