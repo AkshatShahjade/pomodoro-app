@@ -1,5 +1,6 @@
 package com.example.pomodoroapp.ui
 
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.lifecycle.ViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -26,14 +27,12 @@ class PomodoroViewModel: ViewModel() {
     fun toggleTimer(){
         _uiState.update { it.copy(isTimerRunning = !it.isTimerRunning) }
     }
-
     fun timerEnd(){
         _uiState.update { it.copy(
             isTimerRunning = false,
             isTimerEnded = true,
         ) }
     }
-
     fun startNextTimer(){
         val _timerStage = _uiState.value.timerStage+1
         _uiState.update { it.copy(
@@ -43,7 +42,6 @@ class PomodoroViewModel: ViewModel() {
             isTimerRunning = false
         ) }
     }
-
     private fun decideSessionType(stage: Int): String{
         val currTimerProfile = _uiState.value.timerProfile
         if(stage%2==0) {
@@ -56,7 +54,6 @@ class PomodoroViewModel: ViewModel() {
             return currTimerProfile.breakDuration.minutes.toString()
         }
     }
-
     fun extendTimer1min(){
         _uiState.update { it.copy(
             timer = (Duration.parse(it.timer)+1.minutes).toString(),
@@ -64,13 +61,11 @@ class PomodoroViewModel: ViewModel() {
             isTimerRunning = true
         ) }
     }
-
     fun decreaseTimer(sec:Int){
         _uiState.update { it.copy (
             timer = (Duration.parse(it.timer) - sec.seconds).toString()
         ) }
     }
-
     fun updateWorkDuration(newVal: Float){
         _uiState.update { it.copy(
             timerProfile = _uiState.value.timerProfile.copy(
@@ -106,5 +101,22 @@ class PomodoroViewModel: ViewModel() {
             ),
             timerStage = 0,
         ) }
+    }
+
+    fun toggleDarkMode(){
+        _uiState.update{ it.copy(
+            inDarkMode = !_uiState.value.inDarkMode
+        )}
+    }
+    var counter = 0
+    fun setColorModeOnce(inDarkMode: Boolean){
+        if(counter==0) {
+            _uiState.update {
+                it.copy(
+                    inDarkMode = inDarkMode
+                )
+            }
+            counter++
+        }
     }
 }

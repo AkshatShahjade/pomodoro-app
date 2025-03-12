@@ -42,8 +42,8 @@ import com.example.pomodoroapp.ui.theme.PomodoroAppTheme
 @Composable
 fun SettingsScreen(modifier: Modifier = Modifier,
                    onTimerDurationSettingsClick: ()->Unit = {},
-                   pomodoroUiState: PomodoroUiState? = null,
-                   pomodoroViewModel: PomodoroViewModel? = null,){
+                   pomodoroUiState: PomodoroUiState,
+                   pomodoroViewModel: PomodoroViewModel,){
     PomodoroAppTheme (darkTheme = true){ // temp
         // TODO: The adaptive arrangement of the row elements aren't ideal, currently using weight for them, but will need to change...
         LazyColumn(
@@ -93,7 +93,8 @@ fun SettingsScreen(modifier: Modifier = Modifier,
                     modifier = Modifier,
                     title = stringResource(R.string.dark_theme),
                     isSwitch = true,
-                    value = false,
+                    value = pomodoroUiState.inDarkMode,
+                    onClick = pomodoroViewModel::toggleDarkMode,
                 )
             }
             item{
@@ -285,7 +286,7 @@ fun SettingMenuItem(modifier: Modifier = Modifier,
 @Composable
 fun SettingsPreview(){
     PomodoroAppTheme (darkTheme = true){
-        SettingsScreen()
+        SettingsScreen(pomodoroViewModel = PomodoroViewModel(), pomodoroUiState = PomodoroUiState())
 
 
 //        var settingActive by remember{ mutableStateOf(false) }

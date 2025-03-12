@@ -39,11 +39,9 @@ fun TimerDurationSettingsScreen(
     pomodoroViewModel: PomodoroViewModel,
     pomodoroUiState: PomodoroUiState
 ){
-//    var currentTimerProfile by rememberSaveable { mutableStateOf(DataSource.timerProfileList[0]) }
 
     val currentTimerProfile = pomodoroUiState.timerProfile
 
-    //TODO: Animate:
     Column(
         modifier = Modifier
             .fillMaxSize()

@@ -6,6 +6,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.annotation.StringRes
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -70,6 +71,7 @@ class MainActivity : ComponentActivity() {
 
             val pomodoroViewModel: PomodoroViewModel = viewModel()
             val pomodoroUiState by pomodoroViewModel.uiState.collectAsState()
+            pomodoroViewModel.setColorModeOnce(isSystemInDarkTheme()) // Set Color Mode to system default
 
             // should I use whileloopp?
             LaunchedEffect(pomodoroUiState.isTimerRunning, pomodoroUiState.timer) {
@@ -86,11 +88,11 @@ class MainActivity : ComponentActivity() {
                 }
             }
 
-            PomodoroAppTheme {
+            PomodoroAppTheme(darkTheme = pomodoroUiState.inDarkMode) {
                 Scaffold (
                     modifier = Modifier.fillMaxSize().windowInsetsPadding(WindowInsets.systemBars),
                     topBar = {
-                        if(navController.previousBackStackEntry!=null
+                        if( navController.previousBackStackEntry!=null
                             && currentScreen != AppScreens.HomeScreen) {
                             navigationTopBar(
                                 currentScreen = currentScreen,
@@ -149,7 +151,12 @@ fun navigationTopBar(
 ){
     TopAppBar(
         modifier = Modifier,
-        title = { Text(text = stringResource(currentScreen.title)) },
+        title = {
+            Text(
+                text = stringResource(currentScreen.title),
+                color = MaterialTheme.colorScheme.onPrimary
+            )
+        },
         navigationIcon = {
             IconButton(
                 modifier = Modifier,
@@ -157,11 +164,12 @@ fun navigationTopBar(
             ){
                 Icon(
                     imageVector = Icons.Filled.ArrowBack,
-                    contentDescription = "Back"
+                    contentDescription = "Back",
+                    tint = MaterialTheme.colorScheme.onPrimary
                 )}
         },
         colors = TopAppBarDefaults.mediumTopAppBarColors(
-            containerColor = MaterialTheme.colorScheme.primaryContainer
+            containerColor = MaterialTheme.colorScheme.primary
         ),
     )
 }
