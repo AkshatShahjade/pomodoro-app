@@ -7,7 +7,7 @@ import kotlinx.android.parcel.Parcelize
 
 data class TimerProfile(
     val name: String = "25/5",
-    val workDuration: Int = 1,
+    val workDuration: Int = 25,
     val breakDuration: Int = 5,
     val longBreaksOn: Boolean = false,
     val longBreakDuration: Int = 15,

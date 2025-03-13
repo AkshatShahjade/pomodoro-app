@@ -138,9 +138,9 @@ fun HomePageTimer(modifier: Modifier,
         },
     ) {
         Text(
-            text = "%01d:%02d:%02d".format(
-                Duration.parse(timer).inWholeHours % 60,
-                Duration.parse(timer).inWholeMinutes % 60,
+            text = "%d:%02d".format(
+//                Duration.parse(timer).inWholeHours % 60,
+                Duration.parse(timer).inWholeMinutes, // %60,
                 Duration.parse(timer).inWholeSeconds % 60
             ),
             style = MaterialTheme.typography.displayLarge,

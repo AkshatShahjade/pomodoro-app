@@ -2,6 +2,10 @@ package com.example.pomodoroapp.ui
 
 import android.content.Context
 import android.media.MediaPlayer
+import android.os.Build
+import android.os.VibrationEffect
+import android.os.Vibrator
+import android.util.Log
 import androidx.annotation.RawRes
 import androidx.lifecycle.ViewModel
 import com.example.pomodoroapp.data.Notification
@@ -22,10 +26,84 @@ class PomodoroViewModel: ViewModel() {
     init{
         // TODO: Change this to the saved profile value...
         _uiState.value = PomodoroUiState(
-            timer = _uiState.value.timerProfile.workDuration.seconds.toString()
+            timer = _uiState.value.timerProfile.workDuration.minutes.toString()
         )
     }
 
+    // Notification Sound Functions
+    private var mediaPlayer: MediaPlayer? = null
+    fun playNotificationSound(context: Context, @RawRes sound: Int) {
+        mediaPlayer = MediaPlayer.create(context, sound)
+        mediaPlayer?.start()
+    }
+    private fun playLoopedNotificationSound(context: Context, @RawRes sound: Int) {
+        mediaPlayer = MediaPlayer.create(context, sound)
+        mediaPlayer?.isLooping=true
+        mediaPlayer?.start()
+    }
+    private fun stopSound() {
+        mediaPlayer?.release()
+        mediaPlayer = null
+    }
+
+    // Notification Sound Functions
+    private var vibrator: Vibrator? = null
+    private fun playLoopedNotificationVibration(context: Context){
+        vibrator = context.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
+        if (vibrator?.hasVibrator() == true) { // Ensure device has a vibrator
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                val pattern = longArrayOf(0, 500, 1000) // Delay, Vibration Duration, Pause
+                val effect = VibrationEffect.createWaveform(pattern, 1) // Loop indefinitely (index 1)
+                vibrator!!.vibrate(effect)
+            } else {
+                val pattern = longArrayOf(0, 500, 1000)
+                vibrator!!.vibrate(pattern, 1) // Loop indefinitely for old devices
+            }
+        } else {
+            Log.d("Vibration", "Device does not support vibration")
+        }
+    }
+    private fun playNotificationVibration(context: Context){
+        vibrator = context.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
+        if (vibrator?.hasVibrator() == true) { // Ensure device has a vibrator
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                vibrator?.vibrate(
+                    VibrationEffect.createOneShot(
+                        500,
+                        255
+                    )
+                )
+            } else {
+                vibrator?.vibrate(500)
+            }
+        }else {
+            Log.d("Vibration", "Device does not support vibration")
+        }
+    }
+    private fun stopVibration(){
+        vibrator?.cancel()
+    }
+
+    //todo: uNDERSTAND...
+    private fun playNotification(context: Context){
+        if (_uiState.value.notificationSoundOn) {
+            if(_uiState.value.insistentNotificationOn) {
+                playLoopedNotificationSound(context, _uiState.value.notificationSound.id)
+            } else {
+                playNotificationSound(context, _uiState.value.notificationSound.id)
+            }
+        }
+        if (_uiState.value.notificationVibrationOn){
+            if(_uiState.value.insistentNotificationOn){
+                playLoopedNotificationVibration(context)
+            } else {
+                playNotificationVibration(context)
+            }
+        }
+    }
+
+
+    // Timer Related Functions
     fun toggleTimer(){
         _uiState.update { it.copy(isTimerRunning = !it.isTimerRunning) }
     }
@@ -36,49 +114,25 @@ class PomodoroViewModel: ViewModel() {
             isTimerEnded = true,
         ) }
     }
-
-
-    private fun playNotification(context: Context){
-        if (_uiState.value.notificationSoundOn) {
-            if(_uiState.value.insistentNotificationOn) {
-                playLoopedNotificationSound(context, _uiState.value.notificationSound.id)
-            } else {
-                playNotificationSound(context, _uiState.value.notificationSound.id)
-            }
-        }
-    }
-
-    private var mediaPlayer: MediaPlayer? = null
-
-    fun playNotificationSound(context: Context, @RawRes sound: Int) {
-        mediaPlayer = MediaPlayer.create(context, sound)
-        mediaPlayer?.start()
-    }
-
-    fun playLoopedNotificationSound(context: Context, @RawRes sound: Int) {
-        mediaPlayer = MediaPlayer.create(context, sound)
-        mediaPlayer?.isLooping=true
-        mediaPlayer?.start()
-    }
-
-    private fun stopSound() {
-        mediaPlayer?.let {
-            if (it.isPlaying) {
-                it.stop()
-                it.release()
-            }
-        }
-        mediaPlayer = null
-    }
-
     fun startNextTimer(){
         stopSound()
+        stopVibration()
+
         val _timerStage = _uiState.value.timerStage+1
         _uiState.update { it.copy(
             timerStage = _timerStage,
             timer = decideSessionType(_timerStage),
             isTimerEnded = false,
             isTimerRunning = false
+        ) }
+    }
+    fun extendTimer1min(){
+        stopSound()
+        stopVibration()
+        _uiState.update { it.copy(
+            timer = (Duration.parse(it.timer)+1.minutes).toString(),
+            isTimerEnded = false,
+            isTimerRunning = true
         ) }
     }
     private fun decideSessionType(stage: Int): String{
@@ -93,14 +147,7 @@ class PomodoroViewModel: ViewModel() {
             return currTimerProfile.breakDuration.minutes.toString()
         }
     }
-    fun extendTimer1min(){
-        stopSound()
-        _uiState.update { it.copy(
-            timer = (Duration.parse(it.timer)+1.minutes).toString(),
-            isTimerEnded = false,
-            isTimerRunning = true
-        ) }
-    }
+    // Timer Profile Setting Functions
     fun decreaseTimer(sec:Int){
         _uiState.update { it.copy (
             timer = (Duration.parse(it.timer) - sec.seconds).toString()
@@ -143,6 +190,7 @@ class PomodoroViewModel: ViewModel() {
         ) }
     }
 
+    // Settings related Functions
     var counter = 0
     fun setColorModeOnce(inDarkMode: Boolean){
         if(counter==0) {

@@ -30,4 +30,5 @@
     <string name="work_session_duration">Work Session Duration</string>
     <string name="break_session_duration">Break Session Duration</string>
     <string name="sound_enabled">Sound Enabled</string>
+    <string name="vibration_enabled">Vibration Enabled</string>
 </resources>

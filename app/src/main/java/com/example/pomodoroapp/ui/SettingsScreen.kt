@@ -131,6 +131,7 @@ fun SettingsScreen(modifier: Modifier = Modifier,
                         value = soundOn,
                         onClick = pomodoroViewModel::toggleNotificationSoundOn
                     )
+                    //Dialog Box to Choose
                     if (soundOn) {
                         var dialogVisible by rememberSaveable { mutableStateOf(false) }
                         SettingMenuItem(
@@ -222,6 +223,15 @@ fun SettingsScreen(modifier: Modifier = Modifier,
             item {
                 SettingMenuItem(
                     modifier = Modifier,
+                    title = stringResource(R.string.vibration_enabled),
+                    isSwitch = true,
+                    value = pomodoroUiState.notificationVibrationOn,
+                    onClick = pomodoroViewModel::toggleNotificationVibrationOn
+                )
+            }
+            item {
+                SettingMenuItem(
+                    modifier = Modifier,
                     title = stringResource(R.string.insistent_notifications),
                     description = stringResource(R.string.repeat_the_notifications_until_cancelled),
                     isSwitch = false,
@@ -299,7 +309,9 @@ fun NotificationDialogItem(modifier: Modifier = Modifier,
                            onClick: () -> Unit ={},
 ){
     Row(
-        modifier = modifier.fillMaxWidth().clickable { onClick() },
+        modifier = modifier
+            .fillMaxWidth()
+            .clickable { onClick() },
         verticalAlignment = Alignment.CenterVertically,
     ){
         IconButton (
