@@ -6,6 +6,7 @@ import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.gestures.detectVerticalDragGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -83,7 +84,10 @@ fun HomeScreen(modifier: Modifier = Modifier,
         HomePageTimer(modifier = Modifier,
             timer = pomodoroUiState.timer,
             onTimerClick = pomodoroViewModel::toggleTimer,
-            onTimerSwipeDown = { pomodoroViewModel.startNextTimer(context) },
+            onTimerSwipeDown = { pomodoroViewModel.startNextTimer(context, 1) },
+            onTimerSwipeUp = { pomodoroViewModel.increaseTimer(60) },
+            onTimerSwipeLeft = {  },
+            onTimerSwipeRight = {  },
         )
 
         Spacer(Modifier.weight(1f))
@@ -120,7 +124,10 @@ fun HomeScreen(modifier: Modifier = Modifier,
 fun HomePageTimer(modifier: Modifier,
                   timer: String,
                   onTimerClick: () -> Unit,
-                  onTimerSwipeDown: () -> Unit
+                  onTimerSwipeDown: () -> Unit,
+                  onTimerSwipeLeft: () -> Unit,
+                  onTimerSwipeRight: () -> Unit,
+                  onTimerSwipeUp: () -> Unit,
                   ) {
     TextButton(
         onClick = { onTimerClick() },
@@ -128,14 +135,23 @@ fun HomePageTimer(modifier: Modifier,
             var totalDrag = 0f
             detectVerticalDragGestures(
                 onDragEnd = {
-                    if(totalDrag>0f) {
-                        onTimerSwipeDown()
-                    }
+                    if(totalDrag>0f) { onTimerSwipeDown() }
+                    else { onTimerSwipeUp() }
                     totalDrag = 0f
                 },
-                onDragStart = {},
-                onDragCancel = {},
                 onVerticalDrag = { _, dragAmount ->
+                    totalDrag = dragAmount
+                }
+            )}
+            .pointerInput(Unit){
+            var totalDrag = 0f
+            detectHorizontalDragGestures(
+                onDragEnd = {
+                    if(totalDrag>0f) { onTimerSwipeRight() }
+                    else { onTimerSwipeLeft() }
+                    totalDrag = 0f
+                },
+                onHorizontalDrag = { _, dragAmount ->
                     totalDrag = dragAmount
                 }
             )

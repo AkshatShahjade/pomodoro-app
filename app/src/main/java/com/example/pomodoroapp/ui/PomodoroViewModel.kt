@@ -193,9 +193,14 @@ class PomodoroViewModel: ViewModel() {
     fun toggleTimer(){
         _uiState.update { it.copy(isTimerRunning = !it.isTimerRunning) }
     }
-    fun decreaseTimer(sec:Int){
+    fun decreaseTimer(sec:Int = 1){
         _uiState.update { it.copy (
             timer = (Duration.parse(it.timer) - sec.seconds).toString()
+        ) }
+    }
+    fun increaseTimer(sec:Int = 60){
+        _uiState.update { it.copy (
+            timer = (Duration.parse(it.timer) + sec.seconds).toString()
         ) }
     }
     fun timerEnd(context: Context) {
@@ -231,7 +236,7 @@ class PomodoroViewModel: ViewModel() {
 
         }
     }
-    fun startNextTimer(context: Context){
+    fun startNextTimer(context: Context, delta: Int = 1){
         //Lets the Notification play for some time instead of immediately cancelling them
         viewModelScope.launch {
             delay(2000L)
@@ -240,7 +245,7 @@ class PomodoroViewModel: ViewModel() {
             stopNotificationFlashLoop()
         }
 
-        val nextTimerStage = _uiState.value.timerStage+1
+        val nextTimerStage = _uiState.value.timerStage+delta
         _uiState.update { it.copy(
             timerStage = nextTimerStage,
             timer = getSessionDuration(getTimerSessionType(nextTimerStage)),
