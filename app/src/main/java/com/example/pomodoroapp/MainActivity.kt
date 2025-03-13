@@ -1,7 +1,6 @@
 package com.example.pomodoroapp
 
 import android.content.Context
-import android.media.MediaPlayer
 import android.os.Bundle
 import android.util.Log
 import android.view.WindowManager
@@ -20,10 +19,8 @@ import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
@@ -32,10 +29,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.layout.ApproachMeasureScope
-import androidx.compose.ui.modifier.modifierLocalMapOf
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
@@ -64,7 +58,6 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
 
-
         setContent {
             val context: Context = this
             val navController: NavHostController = rememberNavController()
@@ -77,6 +70,7 @@ class MainActivity : ComponentActivity() {
             val pomodoroViewModel: PomodoroViewModel = viewModel()
             val pomodoroUiState by pomodoroViewModel.uiState.collectAsState()
 
+            // Screen Settings:
             pomodoroViewModel.setColorModeOnce(isSystemInDarkTheme()) // Set Color Mode to system default
 
             if(pomodoroUiState.keepScreenOn) {
@@ -85,7 +79,11 @@ class MainActivity : ComponentActivity() {
                 window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
             }
 
-            // should I use whileloopp?
+            // Sets the full screen, and recomposes to changes in fullScreenOn state variable
+            pomodoroViewModel.setFullScreen(LocalView.current, pomodoroUiState.fullScreenOn)
+
+
+            // Timer Coroutine
             LaunchedEffect(pomodoroUiState.isTimerRunning, pomodoroUiState.timer) {
                 if (Duration.parse(pomodoroUiState.timer).inWholeSeconds > 0L
                         && pomodoroUiState.isTimerRunning == true) {
@@ -106,6 +104,7 @@ class MainActivity : ComponentActivity() {
                 }
             }
 
+            // UI
             PomodoroAppTheme(darkTheme = pomodoroUiState.inDarkMode) {
                 Scaffold (
                     modifier = Modifier.fillMaxSize().windowInsetsPadding(WindowInsets.systemBars),

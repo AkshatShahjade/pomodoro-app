@@ -36,6 +36,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -92,7 +93,8 @@ fun SettingsScreen(modifier: Modifier = Modifier,
                     modifier = Modifier,
                     title = stringResource(R.string.fullscreen_mode),
                     isSwitch = false,
-                    value = false,
+                    value = pomodoroUiState.fullScreenOn,
+                    onClick = pomodoroViewModel::toggleFullScreenOn,
                 )
             }
             item {

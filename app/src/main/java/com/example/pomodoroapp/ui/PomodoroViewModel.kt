@@ -6,6 +6,9 @@ import android.os.Build
 import android.os.VibrationEffect
 import android.os.Vibrator
 import android.util.Log
+import android.view.View
+import android.view.WindowInsets
+import android.view.WindowInsetsController
 import androidx.annotation.RawRes
 import androidx.lifecycle.ViewModel
 import com.example.pomodoroapp.data.Notification
@@ -30,6 +33,35 @@ class PomodoroViewModel: ViewModel() {
 //            timer = "1m 2s"
         )
     }
+
+    fun setFullScreen(view: View, fullScreenOn: Boolean) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            val windowInsetsController = view.windowInsetsController
+            if (windowInsetsController != null) {
+                if (fullScreenOn) {
+                    windowInsetsController.hide(WindowInsets.Type.statusBars() or WindowInsets.Type.navigationBars())
+                    windowInsetsController.systemBarsBehavior = WindowInsetsController.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+                } else {
+                    windowInsetsController.show(WindowInsets.Type.statusBars() or WindowInsets.Type.navigationBars())
+                }
+            }
+        } else {
+            @Suppress("DEPRECATION")
+            if (fullScreenOn) {
+                view.systemUiVisibility = (
+                        View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
+                                or View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                                or View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                                or View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                                or View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+                                or View.SYSTEM_UI_FLAG_FULLSCREEN
+                        )
+            } else {
+                view.systemUiVisibility = View.SYSTEM_UI_FLAG_VISIBLE
+            }
+        }
+    }
+
 
     // Notification Sound Functions
     private var mediaPlayer: MediaPlayer? = null
@@ -58,6 +90,7 @@ class PomodoroViewModel: ViewModel() {
                 vibrator!!.vibrate(effect)
             } else {
                 val pattern = longArrayOf(0, 500, 1000)
+                @Suppress("DEPRECATION")
                 vibrator!!.vibrate(pattern, 1) // Loop indefinitely for old devices
             }
         } else {
@@ -75,6 +108,7 @@ class PomodoroViewModel: ViewModel() {
                     )
                 )
             } else {
+                @Suppress("DEPRECATION")
                 vibrator?.vibrate(500)
             }
         }else {
@@ -256,6 +290,13 @@ class PomodoroViewModel: ViewModel() {
         _uiState.update {
             it.copy(
                 preNotificationOn = !_uiState.value.preNotificationOn
+            )
+        }
+    }
+    fun toggleFullScreenOn() {
+        _uiState.update {
+            it.copy(
+                fullScreenOn = !_uiState.value.fullScreenOn
             )
         }
     }

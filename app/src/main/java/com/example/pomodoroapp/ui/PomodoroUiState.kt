@@ -21,5 +21,6 @@ data class PomodoroUiState(
     val notificationFlashOn: Boolean = true,
     val insistentNotificationOn: Boolean = true,
     val preNotificationOn: Boolean = false,
+    val fullScreenOn: Boolean = false,
 )
 
