@@ -10,12 +10,15 @@ import androidx.activity.enableEdgeToEdge
 import androidx.annotation.StringRes
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material3.BottomAppBar
+import androidx.compose.material3.BottomAppBarDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -107,11 +110,11 @@ class MainActivity : ComponentActivity() {
             // UI
             PomodoroAppTheme(darkTheme = pomodoroUiState.inDarkMode) {
                 Scaffold (
-                    modifier = Modifier.fillMaxSize().windowInsetsPadding(WindowInsets.systemBars),
+                    modifier = Modifier.fillMaxSize(),
                     topBar = {
                         if( navController.previousBackStackEntry!=null
                             && currentScreen != AppScreens.HomeScreen) {
-                            navigationTopBar(
+                            NavigationTopBar(
                                 currentScreen = currentScreen,
                                 onUpCLick = { navController.navigateUp() }
                             )
@@ -120,8 +123,10 @@ class MainActivity : ComponentActivity() {
                 ){ innerPadding ->
 
                     NavHost(
-                        modifier = Modifier.fillMaxSize().padding(innerPadding),
-                        navController = navController,
+                        modifier = Modifier.fillMaxSize()
+                            .padding(innerPadding)
+//                            .padding(WindowInsets.systemBars.asPaddingValues()),
+                        ,navController = navController,
                         startDestination = AppScreens.HomeScreen.name,
                     ){
                         composable(AppScreens.HomeScreen.name)
@@ -136,7 +141,7 @@ class MainActivity : ComponentActivity() {
                         composable(AppScreens.SettingsScreen.name)
                         {
                             SettingsScreen(
-                                modifier = Modifier.padding(innerPadding),
+                                modifier = Modifier.padding(),
                                 onTimerDurationSettingsClick = {
                                     navController.navigate(AppScreens.TimerDurationSettingsScreen.name)
                                 },
@@ -162,7 +167,7 @@ class MainActivity : ComponentActivity() {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun navigationTopBar(
+fun NavigationTopBar(
     currentScreen: AppScreens,
     onUpCLick: ()->Unit,
 ){

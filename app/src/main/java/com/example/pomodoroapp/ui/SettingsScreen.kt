@@ -2,6 +2,7 @@ package com.example.pomodoroapp.ui
 
 import android.content.Context
 import androidx.annotation.DrawableRes
+import androidx.annotation.StringRes
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
@@ -21,6 +22,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Checkbox
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -34,12 +36,14 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
@@ -61,14 +65,8 @@ fun SettingsScreen(modifier: Modifier = Modifier,
                 .padding(dimensionResource(R.dimen.padding_small))
         ) {
             item{
-//                HorizontalDivider(
-//                    modifier = Modifier.fillMaxWidth()
-//                )
-                Text(
-                    modifier = Modifier.padding(dimensionResource(R.dimen.padding_small)),
-                    text = stringResource(R.string.general),
-                    style = MaterialTheme.typography.titleMedium
-                )
+                SettingTitle(modifier = Modifier,
+                    textId = R.string.general,)
             }
             item {
                 SettingMenuItem(
@@ -107,14 +105,8 @@ fun SettingsScreen(modifier: Modifier = Modifier,
                 )
             }
             item{
-//                HorizontalDivider(
-//                    modifier = Modifier.fillMaxWidth()
-//                )
-                Text(
-                    modifier = Modifier.padding(dimensionResource(R.dimen.padding_small)),
-                    text = stringResource(R.string.notifications),
-                    style = MaterialTheme.typography.titleMedium
-                )
+                SettingTitle(modifier = Modifier,
+                    textId = R.string.notifications,)
             }
             item {
                 val soundOn = pomodoroUiState.notificationSoundOn
@@ -232,14 +224,38 @@ fun SettingsScreen(modifier: Modifier = Modifier,
                 )
             }
             item {
-                SettingMenuItem(
-                    modifier = Modifier,
-                    title = stringResource(R.string.insistent_notifications),
-                    description = stringResource(R.string.repeat_the_notifications_until_cancelled),
-                    isSwitch = false,
-                    value = pomodoroUiState.insistentNotificationOn,
-                    onClick = pomodoroViewModel::toggleInsistentNotificationOn,
-                )
+                Column(
+                    modifier = Modifier.animateContentSize(
+                        animationSpec = spring(
+                            dampingRatio = Spring.DampingRatioMediumBouncy,
+                            stiffness = Spring.StiffnessMedium,
+                        )
+                    ),
+                ) {
+                    var insistentNotificationOn = pomodoroUiState.insistentNotificationOn
+                    SettingMenuItem(
+                        modifier = Modifier,
+                        title = stringResource(R.string.insistent_notifications),
+                        description = stringResource(R.string.repeat_the_notifications_until_cancelled),
+                        isSwitch = false,
+                        value = insistentNotificationOn,
+                        onClick = pomodoroViewModel::toggleInsistentNotificationOn,
+                    )
+                    if (!insistentNotificationOn) {
+                        SettingMenuItem(
+                            modifier = Modifier.padding(start = dimensionResource(R.dimen.padding_medium)),
+                            title = stringResource(R.string.autostart_work),
+                            isSwitch = false,
+                            value = false,
+                        )
+                        SettingMenuItem(
+                            modifier = Modifier.padding(start = dimensionResource(R.dimen.padding_medium)),
+                            title = stringResource(R.string.autostart_break),
+                            isSwitch = false,
+                            value = false,
+                        )
+                    }
+                }
             }
             item {
                 SettingMenuItem(
@@ -251,31 +267,11 @@ fun SettingsScreen(modifier: Modifier = Modifier,
                     onClick = pomodoroViewModel::togglePreNotificationOn
                 )
             }
-            item {
-                SettingMenuItem(
-                    modifier = Modifier,
-                    title = stringResource(R.string.autostart_work),
-                    isSwitch = false,
-                    value = false,
-                )
-            }
-            item {
-                SettingMenuItem(
-                    modifier = Modifier,
-                    title = stringResource(R.string.autostart_break),
-                    isSwitch = false,
-                    value = false,
-                )
-            }
+
             item{
-//                HorizontalDivider(
-//                    modifier = Modifier.fillMaxWidth()
-//                )
-                Text(
-                    modifier = Modifier.padding(dimensionResource(R.dimen.padding_small)),
-                    text = stringResource(R.string.during_work_sessions),
-                    style = MaterialTheme.typography.titleMedium
-                )
+                SettingTitle(modifier = Modifier,
+                    textId = R.string.during_work_sessions,
+                    )
             }
             item {
                 SettingMenuItem(
@@ -387,7 +383,7 @@ fun SettingMenuItem(modifier: Modifier = Modifier,
             if(description!=null){
                 Text(
                     text = description,
-                    style = MaterialTheme.typography.bodyMedium,
+                    style = MaterialTheme.typography.bodySmall,
                 )
             }
             if(value !is Boolean && value != null){
@@ -420,6 +416,24 @@ fun SettingMenuItem(modifier: Modifier = Modifier,
                 )
             }
         }
+    }
+}
+
+@Composable
+fun SettingTitle(modifier: Modifier = Modifier,
+                 @StringRes textId: Int,
+                 textStyle: TextStyle = MaterialTheme.typography.titleLarge) {
+    Column {
+        HorizontalDivider(
+            modifier = modifier
+                .fillMaxWidth()
+                .padding(horizontal = dimensionResource(R.dimen.padding_small))
+        )
+        Text(
+            modifier = Modifier.padding(dimensionResource(R.dimen.padding_small)),
+            text = stringResource(textId),
+            style = textStyle
+        )
     }
 }
 
