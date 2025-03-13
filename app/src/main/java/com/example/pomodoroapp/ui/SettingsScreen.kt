@@ -225,6 +225,15 @@ fun SettingsScreen(modifier: Modifier = Modifier,
                 )
             }
             item {
+                SettingMenuItem(
+                    modifier = Modifier,
+                    title = stringResource(R.string.flashed_enabled),
+                    isSwitch = true,
+                    value = pomodoroUiState.notificationFlashOn,
+                    onClick = pomodoroViewModel::toggleNotificationFlashOn
+                )
+            }
+            item {
                 Column(
                     modifier = Modifier.animateContentSize(
                         animationSpec = spring(
@@ -276,38 +285,43 @@ fun SettingsScreen(modifier: Modifier = Modifier,
                     )
             }
             item {
-                SettingMenuItem(
-                    modifier = Modifier,
-                    title = stringResource(R.string.disable_sound_and_vibration),
-                    description = stringResource(R.string.click_to_grant_permission),
-                    isSwitch = false,
-                    value = false
-                )
-            }
-            item {
 
                 val localContext = LocalContext.current
                 val notificationManager =
                     localContext.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
                 val accessGranted = notificationManager.isNotificationPolicyAccessGranted()
 
-                SettingMenuItem(
+                Column(
                     modifier = Modifier,
-                    title = stringResource(R.string.do_not_disturb_mode),
-                    description = if(!accessGranted)
-                        stringResource(R.string.click_to_grant_permission)
-                        else null,
-                    isSwitch = false,
-                    value = pomodoroUiState.dndMode,
-                    onClick = {
-                        if(!accessGranted){
-                            pomodoroViewModel.requestDndPermission(localContext)
-                        }else{
-                            pomodoroViewModel.toggleDndMode()
+                ){
+                    SettingMenuItem(
+                        modifier = Modifier,
+                        title = stringResource(R.string.do_not_disturb_mode),
+                        description = if (!accessGranted)
+                            stringResource(R.string.click_to_grant_permission)
+                        else "Only Alarms and High Priority Notifications",
+                        isSwitch = false,
+                        value = pomodoroUiState.dndMode,
+                        onClick = {
+                            if (!accessGranted) {
+                                pomodoroViewModel.requestDndPermission(localContext)
+                            } else {
+                                pomodoroViewModel.toggleDndMode()
+                            }
                         }
-                    }
-                )
+                    )
+
+                    SettingMenuItem(
+                        modifier = Modifier,
+                        title = "Silent Mode",
+                        description = "Only Alarms",
+                        isSwitch = false,
+                        value = pomodoroUiState.silentMode,
+                        onClick = { pomodoroViewModel.toggleSilentMode() }
+                    )
+                }
             }
+
         }
 
     }

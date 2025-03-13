@@ -85,8 +85,9 @@ class MainActivity : ComponentActivity() {
 
             // Sets the full screen, and recomposes to changes in fullScreenOn state variable
             pomodoroViewModel.setFullScreen(LocalView.current, pomodoroUiState.fullScreenOn)
-            // Set initial DND Settings
+            // Set initial DND & Silent Settings
             pomodoroViewModel.updateDndMode(LocalContext.current)
+            pomodoroViewModel.updateSilentMode(LocalContext.current)
 
             // Timer Coroutine
             LaunchedEffect(pomodoroUiState.isTimerRunning, pomodoroUiState.timer) {

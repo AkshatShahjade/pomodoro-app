@@ -3,6 +3,7 @@ package com.example.pomodoroapp.ui
 import android.app.NotificationManager
 import android.content.Context
 import android.content.Intent
+import android.media.AudioManager
 import android.media.MediaPlayer
 import android.os.Build
 import android.os.VibrationEffect
@@ -13,11 +14,13 @@ import android.view.View
 import android.view.WindowInsets
 import android.view.WindowInsetsController
 import androidx.annotation.RawRes
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.pomodoroapp.data.Notification
 import com.example.pomodoroapp.data.TimerSessionType
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -38,7 +41,7 @@ class PomodoroViewModel: ViewModel() {
         // TODO: Change this to the saved profile value...
         _uiState.value = PomodoroUiState(
             timer = _uiState.value.timerProfile.workDuration.minutes.toString()
-//            timer = "5s"
+//            timer = "1m 2s" // For Testing
         )
     }
 
@@ -126,6 +129,29 @@ class PomodoroViewModel: ViewModel() {
         vibrator?.cancel()
     }
 
+    // Notification Flash Functions
+    private var flashJob: Job? = null
+    private var originalColorTheme: Boolean = false // false->Light,...
+    private fun playNotificationFlashLoop(){
+        originalColorTheme = _uiState.value.inDarkMode
+        flashJob = viewModelScope.launch {
+            while (true) {
+                toggleDarkMode()
+                delay(200)
+                toggleDarkMode()
+                delay(1000)
+            }
+        }
+    }
+    private fun stopNotificationFlashLoop(){
+        flashJob?.cancel()
+        _uiState.update {
+            it.copy(
+                inDarkMode = originalColorTheme
+            )
+        }
+    }
+
     //todo: uNDERSTAND...
     private fun playNotification(context: Context){
         if (_uiState.value.notificationSoundOn) {
@@ -142,6 +168,9 @@ class PomodoroViewModel: ViewModel() {
                 playNotificationVibration(context)
             }
         }
+        if (_uiState.value.notificationFlashOn){
+            playNotificationFlashLoop()
+        }
     }
     fun playPreNotification(context: Context){
         if (_uiState.value.notificationSoundOn) {
@@ -149,6 +178,13 @@ class PomodoroViewModel: ViewModel() {
         }
         if (_uiState.value.notificationVibrationOn){
             playNotificationVibration(context)
+        }
+        if (_uiState.value.notificationFlashOn){
+            viewModelScope.launch {
+                playNotificationFlashLoop()
+                delay(5000L)
+                stopNotificationFlashLoop()
+            }
         }
     }
 
@@ -198,9 +234,10 @@ class PomodoroViewModel: ViewModel() {
     fun startNextTimer(context: Context){
         //Lets the Notification play for some time instead of immediately cancelling them
         viewModelScope.launch {
-            delay(1500L) // 1 second delay
+            delay(2000L)
             stopSound()
             stopVibration()
+            stopNotificationFlashLoop()
         }
 
         val nextTimerStage = _uiState.value.timerStage+1
@@ -211,10 +248,12 @@ class PomodoroViewModel: ViewModel() {
             isTimerRunning = true
         ) }
         updateDndMode(context)
+        updateSilentMode(context)
     }
     fun extendTimer1min(){
         stopSound()
         stopVibration()
+        stopNotificationFlashLoop()
         _uiState.update { it.copy(
             timer = (Duration.parse(it.timer)+1.minutes).toString(),
             isTimerEnded = false,
@@ -367,7 +406,8 @@ class PomodoroViewModel: ViewModel() {
     fun toggleDndMode() {
         _uiState.update {
             it.copy(
-                dndMode = !_uiState.value.dndMode
+                dndMode = !_uiState.value.dndMode,
+                silentMode = false
             )
         }
     }
@@ -412,6 +452,32 @@ class PomodoroViewModel: ViewModel() {
             disableDoNotDisturb(context)
         }
     }
-
+    // Silent Mode
+    fun toggleSilentMode() {
+        _uiState.update {
+            it.copy(
+                silentMode = !_uiState.value.silentMode,
+                dndMode = false,
+            )
+        }
+    }
+    private fun enableSilentMode(context: Context) {
+        val audioManager = context.getSystemService(Context.AUDIO_SERVICE) as AudioManager
+        audioManager.ringerMode = AudioManager.RINGER_MODE_SILENT
+    }
+    private fun disableSilentMode(context: Context) {
+        val audioManager = context.getSystemService(Context.AUDIO_SERVICE) as AudioManager
+        audioManager.ringerMode = AudioManager.RINGER_MODE_NORMAL
+    }
+    fun updateSilentMode(context: Context){
+        val sessionType = getTimerSessionType(_uiState.value.timerStage)
+        if(_uiState.value.silentMode
+            && sessionType == TimerSessionType.WORK
+            && _uiState.value.isTimerRunning){
+            enableSilentMode(context)
+        } else {
+            disableSilentMode(context)
+        }
+    }
 
 }
