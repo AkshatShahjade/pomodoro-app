@@ -11,11 +11,15 @@ import android.view.WindowInsets
 import android.view.WindowInsetsController
 import androidx.annotation.RawRes
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.example.pomodoroapp.data.Notification
+import com.example.pomodoroapp.data.TimerSessionType
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.minutes
@@ -24,14 +28,14 @@ import kotlin.time.Duration.Companion.seconds
 class PomodoroViewModel: ViewModel() {
     private val _uiState: MutableStateFlow<PomodoroUiState> = MutableStateFlow(PomodoroUiState())
     val uiState: StateFlow<PomodoroUiState> = _uiState.asStateFlow()
-//    val startTimer = "2s"
 
     init{
         // TODO: Change this to the saved profile value...
         _uiState.value = PomodoroUiState(
             timer = _uiState.value.timerProfile.workDuration.minutes.toString()
-//            timer = "1m 2s"
+//            timer = "5s"
         )
+
     }
 
     fun setFullScreen(view: View, fullScreenOn: Boolean) {
@@ -61,7 +65,6 @@ class PomodoroViewModel: ViewModel() {
             }
         }
     }
-
 
     // Notification Sound Functions
     private var mediaPlayer: MediaPlayer? = null
@@ -150,23 +153,59 @@ class PomodoroViewModel: ViewModel() {
     fun toggleTimer(){
         _uiState.update { it.copy(isTimerRunning = !it.isTimerRunning) }
     }
-    fun timerEnd(context: Context) {
-        playNotification(context)
-        _uiState.update { it.copy(
-            isTimerRunning = false,
-            isTimerEnded = true,
+    fun decreaseTimer(sec:Int){
+        _uiState.update { it.copy (
+            timer = (Duration.parse(it.timer) - sec.seconds).toString()
         ) }
     }
-    fun startNextTimer(){
-        stopSound()
-        stopVibration()
+    fun timerEnd(context: Context) {
+        playNotification(context)
+        if(!_uiState.value.insistentNotificationOn){
+            if( _uiState.value.autoStartWorkOn
+                && getTimerSessionType(_uiState.value.timerStage)
+                in listOf(TimerSessionType.BREAK, TimerSessionType.LONGBREAK) ){
 
-        val _timerStage = _uiState.value.timerStage+1
+                startNextTimer()
+
+            } else if (_uiState.value.autoStartBreakOn
+                && getTimerSessionType(_uiState.value.timerStage) == TimerSessionType.WORK) {
+
+                startNextTimer()
+
+            } else {
+                _uiState.update {
+                    it.copy(
+                        isTimerRunning = false,
+                        isTimerEnded = true,
+                    )
+                }
+            }
+        } else {
+
+            _uiState.update {
+                it.copy(
+                    isTimerRunning = false,
+                    isTimerEnded = true,
+                )
+            }
+
+        }
+    }
+    fun startNextTimer(){
+
+        //Lets the Notification play for some time instead of immediately cancelling them
+        viewModelScope.launch {
+            delay(1500L) // 1 second delay
+            stopSound()
+            stopVibration()
+        }
+
+        val nextTimerStage = _uiState.value.timerStage+1
         _uiState.update { it.copy(
-            timerStage = _timerStage,
-            timer = decideSessionType(_timerStage),
+            timerStage = nextTimerStage,
+            timer = getSessionDuration(getTimerSessionType(nextTimerStage)),
             isTimerEnded = false,
-            isTimerRunning = false
+            isTimerRunning = true
         ) }
     }
     fun extendTimer1min(){
@@ -178,24 +217,28 @@ class PomodoroViewModel: ViewModel() {
             isTimerRunning = true
         ) }
     }
-    private fun decideSessionType(stage: Int): String{
+
+    private fun getSessionDuration(session: TimerSessionType): String{
+        return when(session){
+            TimerSessionType.WORK -> _uiState.value.timerProfile.workDuration.minutes.toString()
+            TimerSessionType.BREAK -> _uiState.value.timerProfile.breakDuration.minutes.toString()
+            else -> _uiState.value.timerProfile.longBreakDuration.minutes.toString()
+        }
+    }
+    private fun getTimerSessionType(stage: Int): TimerSessionType{
         val currTimerProfile = _uiState.value.timerProfile
         if(stage%2==0) {
-            return currTimerProfile.workDuration.minutes.toString()
+            return TimerSessionType.WORK
         }else if( currTimerProfile.longBreaksOn==true
             && (stage%(currTimerProfile.sessionsBeforeLongBreak*2)
             == currTimerProfile.sessionsBeforeLongBreak*2-1)){
-            return currTimerProfile.longBreakDuration.minutes.toString()
+            return TimerSessionType.LONGBREAK
         }else{
-            return currTimerProfile.breakDuration.minutes.toString()
+            return TimerSessionType.BREAK
         }
     }
+
     // Timer Profile Setting Functions
-    fun decreaseTimer(sec:Int){
-        _uiState.update { it.copy (
-            timer = (Duration.parse(it.timer) - sec.seconds).toString()
-        ) }
-    }
     fun updateWorkDuration(newVal: Float){
         _uiState.update { it.copy(
             timerProfile = _uiState.value.timerProfile.copy(
@@ -210,17 +253,17 @@ class PomodoroViewModel: ViewModel() {
             )
         ) }
     }
-    fun updateLongBreaksOn(){
-        _uiState.update { it.copy(
-            timerProfile = _uiState.value.timerProfile.copy(
-                longBreaksOn = !_uiState.value.timerProfile.longBreaksOn
-            )
-        ) }
-    }
     fun updateLongBreakDuration(newVal: Float){
         _uiState.update { it.copy(
             timerProfile = _uiState.value.timerProfile.copy(
                 longBreakDuration = newVal.roundToInt()
+            )
+        ) }
+    }
+    fun updateLongBreaksOn(){
+        _uiState.update { it.copy(
+            timerProfile = _uiState.value.timerProfile.copy(
+                longBreaksOn = !_uiState.value.timerProfile.longBreaksOn
             )
         ) }
     }
@@ -234,7 +277,7 @@ class PomodoroViewModel: ViewModel() {
     }
 
     // Settings related Functions
-    var counter = 0
+    private var counter = 0 //TODO: Make more elegant
     fun setColorModeOnce(inDarkMode: Boolean){
         if(counter==0) {
             _uiState.update {
@@ -245,6 +288,7 @@ class PomodoroViewModel: ViewModel() {
             counter++
         }
     }
+
     fun updateNotificationSound(newNotification: Notification?){
         if(newNotification != null){
             _uiState.update { it.copy(
@@ -297,6 +341,20 @@ class PomodoroViewModel: ViewModel() {
         _uiState.update {
             it.copy(
                 fullScreenOn = !_uiState.value.fullScreenOn
+            )
+        }
+    }
+    fun toggleAutoStartWorkOn() {
+        _uiState.update {
+            it.copy(
+                autoStartWorkOn = !_uiState.value.autoStartWorkOn
+            )
+        }
+    }
+    fun toggleAutoStartBreakOn() {
+        _uiState.update {
+            it.copy(
+                autoStartBreakOn = !_uiState.value.autoStartBreakOn
             )
         }
     }

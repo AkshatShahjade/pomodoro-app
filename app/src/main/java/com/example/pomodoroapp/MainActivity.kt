@@ -88,22 +88,24 @@ class MainActivity : ComponentActivity() {
 
             // Timer Coroutine
             LaunchedEffect(pomodoroUiState.isTimerRunning, pomodoroUiState.timer) {
-                if (Duration.parse(pomodoroUiState.timer).inWholeSeconds > 0L
-                        && pomodoroUiState.isTimerRunning == true) {
 
-                    if(Duration.parse(pomodoroUiState.timer).inWholeSeconds == 60L
-                        && pomodoroUiState.preNotificationOn){
+                if ( Duration.parse(pomodoroUiState.timer).inWholeSeconds > 0L
+                        && pomodoroUiState.isTimerRunning ) {
+
+                    if( Duration.parse(pomodoroUiState.timer).inWholeSeconds == 60L
+                        && pomodoroUiState.preNotificationOn ) {
                             pomodoroViewModel.playPreNotification(context = context)
                     }
 
                     delay(1000L) // Wait 1 second
                     pomodoroViewModel.decreaseTimer(1)
-                    Log.d(TAG, Duration.parse(pomodoroUiState.timer).inWholeSeconds.toString())
+
                 }
-                else if(Duration.parse(pomodoroUiState.timer).inWholeSeconds <= 0L
-                        && pomodoroUiState.isTimerRunning == true){
+                else if( Duration.parse(pomodoroUiState.timer).inWholeSeconds <= 0L
+                        && pomodoroUiState.isTimerRunning ){
+
                     pomodoroViewModel.timerEnd(context = context)
-                    Log.d(TAG, "ended")
+
                 }
             }
 
@@ -113,7 +115,7 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     topBar = {
                         if( navController.previousBackStackEntry!=null
-                            && currentScreen != AppScreens.HomeScreen) {
+                            && currentScreen != AppScreens.HomeScreen ) {
                             NavigationTopBar(
                                 currentScreen = currentScreen,
                                 onUpCLick = { navController.navigateUp() }

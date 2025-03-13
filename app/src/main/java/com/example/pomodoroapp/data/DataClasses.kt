@@ -2,7 +2,6 @@ package com.example.pomodoroapp.data
 
 import android.os.Parcelable
 import androidx.annotation.RawRes
-import androidx.versionedparcelable.ParcelField
 import kotlinx.android.parcel.Parcelize
 
 data class TimerProfile(
@@ -19,3 +18,9 @@ data class Notification(
     val name: String,
     @RawRes val id: Int,
 ): Parcelable
+
+enum class TimerSessionType() {
+    WORK,
+    BREAK,
+    LONGBREAK,
+}

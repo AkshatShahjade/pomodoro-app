@@ -232,7 +232,7 @@ fun SettingsScreen(modifier: Modifier = Modifier,
                         )
                     ),
                 ) {
-                    var insistentNotificationOn = pomodoroUiState.insistentNotificationOn
+                    val insistentNotificationOn = pomodoroUiState.insistentNotificationOn
                     SettingMenuItem(
                         modifier = Modifier,
                         title = stringResource(R.string.insistent_notifications),
@@ -246,13 +246,15 @@ fun SettingsScreen(modifier: Modifier = Modifier,
                             modifier = Modifier.padding(start = dimensionResource(R.dimen.padding_medium)),
                             title = stringResource(R.string.autostart_work),
                             isSwitch = false,
-                            value = false,
+                            value = pomodoroUiState.autoStartWorkOn,
+                            onClick = pomodoroViewModel::toggleAutoStartWorkOn,
                         )
                         SettingMenuItem(
                             modifier = Modifier.padding(start = dimensionResource(R.dimen.padding_medium)),
                             title = stringResource(R.string.autostart_break),
                             isSwitch = false,
-                            value = false,
+                            value = pomodoroUiState.autoStartBreakOn,
+                            onClick = pomodoroViewModel::toggleAutoStartBreakOn,
                         )
                     }
                 }
