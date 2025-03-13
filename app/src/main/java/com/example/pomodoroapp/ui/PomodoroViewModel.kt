@@ -1,15 +1,19 @@
 package com.example.pomodoroapp.ui
 
+import android.app.NotificationManager
 import android.content.Context
+import android.content.Intent
 import android.media.MediaPlayer
 import android.os.Build
 import android.os.VibrationEffect
 import android.os.Vibrator
+import android.provider.Settings
 import android.util.Log
 import android.view.View
 import android.view.WindowInsets
 import android.view.WindowInsetsController
 import androidx.annotation.RawRes
+import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.pomodoroapp.data.Notification
@@ -20,6 +24,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import java.util.Timer
 import kotlin.math.roundToInt
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.minutes
@@ -35,7 +40,6 @@ class PomodoroViewModel: ViewModel() {
             timer = _uiState.value.timerProfile.workDuration.minutes.toString()
 //            timer = "5s"
         )
-
     }
 
     fun setFullScreen(view: View, fullScreenOn: Boolean) {
@@ -165,12 +169,12 @@ class PomodoroViewModel: ViewModel() {
                 && getTimerSessionType(_uiState.value.timerStage)
                 in listOf(TimerSessionType.BREAK, TimerSessionType.LONGBREAK) ){
 
-                startNextTimer()
+                startNextTimer(context)
 
             } else if (_uiState.value.autoStartBreakOn
                 && getTimerSessionType(_uiState.value.timerStage) == TimerSessionType.WORK) {
 
-                startNextTimer()
+                startNextTimer(context)
 
             } else {
                 _uiState.update {
@@ -191,8 +195,7 @@ class PomodoroViewModel: ViewModel() {
 
         }
     }
-    fun startNextTimer(){
-
+    fun startNextTimer(context: Context){
         //Lets the Notification play for some time instead of immediately cancelling them
         viewModelScope.launch {
             delay(1500L) // 1 second delay
@@ -207,6 +210,7 @@ class PomodoroViewModel: ViewModel() {
             isTimerEnded = false,
             isTimerRunning = true
         ) }
+        updateDndMode(context)
     }
     fun extendTimer1min(){
         stopSound()
@@ -358,5 +362,56 @@ class PomodoroViewModel: ViewModel() {
             )
         }
     }
+
+    // DND Mode
+    fun toggleDndMode() {
+        _uiState.update {
+            it.copy(
+                dndMode = !_uiState.value.dndMode
+            )
+        }
+    }
+    fun requestDndPermission(context: Context) {
+        val notificationManager =
+            context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+
+        if (!notificationManager.isNotificationPolicyAccessGranted) {
+            val intent = Intent(Settings.ACTION_NOTIFICATION_POLICY_ACCESS_SETTINGS)
+            context.startActivity(intent) // Opens settings for the user to grant permission
+        }
+    }
+    private fun enableDoNotDisturb(context: Context) {
+        val notificationManager =
+            context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+
+        if (notificationManager.isNotificationPolicyAccessGranted) {
+            // Set Do Not Disturb mode to "Priority only"
+            notificationManager.setInterruptionFilter(NotificationManager.INTERRUPTION_FILTER_PRIORITY)
+        } else {
+            requestDndPermission(context)
+        }
+    }
+    private fun disableDoNotDisturb(context: Context) {
+        val notificationManager =
+            context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+
+        if (notificationManager.isNotificationPolicyAccessGranted) {
+            // Set Do Not Disturb mode to "Priority only"
+            notificationManager.setInterruptionFilter(NotificationManager.INTERRUPTION_FILTER_ALL)
+        } else {
+            requestDndPermission(context)
+        }
+    }
+    fun updateDndMode(context: Context){
+        val sessionType = getTimerSessionType(_uiState.value.timerStage)
+        if(_uiState.value.dndMode
+            && sessionType == TimerSessionType.WORK
+            && _uiState.value.isTimerRunning){
+            enableDoNotDisturb(context)
+        } else {
+            disableDoNotDisturb(context)
+        }
+    }
+
 
 }

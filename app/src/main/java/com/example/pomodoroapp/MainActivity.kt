@@ -32,6 +32,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -84,7 +85,8 @@ class MainActivity : ComponentActivity() {
 
             // Sets the full screen, and recomposes to changes in fullScreenOn state variable
             pomodoroViewModel.setFullScreen(LocalView.current, pomodoroUiState.fullScreenOn)
-
+            // Set initial DND Settings
+            pomodoroViewModel.updateDndMode(LocalContext.current)
 
             // Timer Coroutine
             LaunchedEffect(pomodoroUiState.isTimerRunning, pomodoroUiState.timer) {

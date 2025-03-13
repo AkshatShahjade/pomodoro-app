@@ -27,5 +27,8 @@ data class PomodoroUiState(
 
     val preNotificationOn: Boolean = false,
     val fullScreenOn: Boolean = false,
+
+    val dndMode: Boolean = false,
+
 )
 

@@ -46,6 +46,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -68,18 +69,21 @@ fun HomeScreen(modifier: Modifier = Modifier,
    ){
 
     var menuVisible by rememberSaveable { mutableStateOf(false) }
+    val context = LocalContext.current
 
     Column(
-        modifier = Modifier.fillMaxSize()
+        modifier = Modifier
+            .fillMaxSize()
             .verticalScroll(rememberScrollState()),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Spacer(Modifier.weight(1.1f))
 
+
         HomePageTimer(modifier = Modifier,
             timer = pomodoroUiState.timer,
             onTimerClick = pomodoroViewModel::toggleTimer,
-            onTimerSwipeDown = pomodoroViewModel::startNextTimer,
+            onTimerSwipeDown = { pomodoroViewModel.startNextTimer(context) },
         )
 
         Spacer(Modifier.weight(1f))
@@ -105,7 +109,7 @@ fun HomeScreen(modifier: Modifier = Modifier,
         BottomHomePageRow({menuVisible = !menuVisible})
         if (pomodoroUiState.isTimerEnded) {
             TimerDialog(
-                onStartNext = pomodoroViewModel::startNextTimer,
+                onStartNext = { pomodoroViewModel.startNextTimer(context) },
                 onExtend1min = pomodoroViewModel::extendTimer1min
             )
         }

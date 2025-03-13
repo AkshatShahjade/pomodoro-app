@@ -1,5 +1,6 @@
 package com.example.pomodoroapp.ui
 
+import android.app.NotificationManager
 import android.content.Context
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
@@ -269,7 +270,6 @@ fun SettingsScreen(modifier: Modifier = Modifier,
                     onClick = pomodoroViewModel::togglePreNotificationOn
                 )
             }
-
             item{
                 SettingTitle(modifier = Modifier,
                     textId = R.string.during_work_sessions,
@@ -285,12 +285,27 @@ fun SettingsScreen(modifier: Modifier = Modifier,
                 )
             }
             item {
+
+                val localContext = LocalContext.current
+                val notificationManager =
+                    localContext.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+                val accessGranted = notificationManager.isNotificationPolicyAccessGranted()
+
                 SettingMenuItem(
                     modifier = Modifier,
                     title = stringResource(R.string.do_not_disturb_mode),
-                    description = stringResource(R.string.click_to_grant_permission),
+                    description = if(!accessGranted)
+                        stringResource(R.string.click_to_grant_permission)
+                        else null,
                     isSwitch = false,
-                    value = false
+                    value = pomodoroUiState.dndMode,
+                    onClick = {
+                        if(!accessGranted){
+                            pomodoroViewModel.requestDndPermission(localContext)
+                        }else{
+                            pomodoroViewModel.toggleDndMode()
+                        }
+                    }
                 )
             }
         }
