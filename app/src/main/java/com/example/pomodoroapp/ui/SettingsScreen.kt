@@ -245,7 +245,8 @@ fun SettingsScreen(modifier: Modifier = Modifier,
                     title = stringResource(R.string.pre_notification),
                     description = stringResource(R.string.notify_1_minute_before_work_session_ends),
                     isSwitch = false,
-                    value = false
+                    value = pomodoroUiState.preNotificationOn,
+                    onClick = pomodoroViewModel::togglePreNotificationOn
                 )
             }
             item {

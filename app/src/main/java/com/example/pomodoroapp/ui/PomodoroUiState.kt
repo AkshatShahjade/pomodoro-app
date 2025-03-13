@@ -20,5 +20,6 @@ data class PomodoroUiState(
     val notificationVibrationOn: Boolean = true, // TODO: Maybe I can set it as enum with different settings like strong, light , SOS, etc.
     val notificationFlashOn: Boolean = true,
     val insistentNotificationOn: Boolean = true,
+    val preNotificationOn: Boolean = false,
 )
 

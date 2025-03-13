@@ -27,6 +27,7 @@ class PomodoroViewModel: ViewModel() {
         // TODO: Change this to the saved profile value...
         _uiState.value = PomodoroUiState(
             timer = _uiState.value.timerProfile.workDuration.minutes.toString()
+//            timer = "1m 2s"
         )
     }
 
@@ -99,6 +100,14 @@ class PomodoroViewModel: ViewModel() {
             } else {
                 playNotificationVibration(context)
             }
+        }
+    }
+    fun playPreNotification(context: Context){
+        if (_uiState.value.notificationSoundOn) {
+            playNotificationSound(context, _uiState.value.notificationSound.id)
+        }
+        if (_uiState.value.notificationVibrationOn){
+            playNotificationVibration(context)
         }
     }
 
@@ -240,6 +249,13 @@ class PomodoroViewModel: ViewModel() {
         _uiState.update {
             it.copy(
                 notificationFlashOn = !_uiState.value.notificationFlashOn
+            )
+        }
+    }
+    fun togglePreNotificationOn() {
+        _uiState.update {
+            it.copy(
+                preNotificationOn = !_uiState.value.preNotificationOn
             )
         }
     }

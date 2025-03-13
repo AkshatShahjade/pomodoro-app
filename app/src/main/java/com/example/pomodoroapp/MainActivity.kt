@@ -89,6 +89,12 @@ class MainActivity : ComponentActivity() {
             LaunchedEffect(pomodoroUiState.isTimerRunning, pomodoroUiState.timer) {
                 if (Duration.parse(pomodoroUiState.timer).inWholeSeconds > 0L
                         && pomodoroUiState.isTimerRunning == true) {
+
+                    if(Duration.parse(pomodoroUiState.timer).inWholeSeconds == 60L
+                        && pomodoroUiState.preNotificationOn){
+                            pomodoroViewModel.playPreNotification(context = context)
+                    }
+
                     delay(1000L) // Wait 1 second
                     pomodoroViewModel.decreaseTimer(1)
                     Log.d(TAG, Duration.parse(pomodoroUiState.timer).inWholeSeconds.toString())
