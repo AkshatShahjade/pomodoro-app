@@ -90,9 +90,9 @@ class MainActivity : ComponentActivity() {
             pomodoroViewModel.updateSilentMode(LocalContext.current)
 
             // Timer Coroutine
-            LaunchedEffect(pomodoroUiState.isTimerRunning, pomodoroUiState.timer) {
+            LaunchedEffect(pomodoroUiState.isTimerRunning) {
 
-                if ( Duration.parse(pomodoroUiState.timer).inWholeSeconds > 0L
+                while ( Duration.parse(pomodoroUiState.timer).inWholeSeconds > 0L
                         && pomodoroUiState.isTimerRunning ) {
 
                     if( Duration.parse(pomodoroUiState.timer).inWholeSeconds == 60L
@@ -104,7 +104,7 @@ class MainActivity : ComponentActivity() {
                     pomodoroViewModel.decreaseTimer(1)
 
                 }
-                else if( Duration.parse(pomodoroUiState.timer).inWholeSeconds <= 0L
+                if( Duration.parse(pomodoroUiState.timer).inWholeSeconds <= 0L
                         && pomodoroUiState.isTimerRunning ){
 
                     pomodoroViewModel.timerEnd(context = context)
