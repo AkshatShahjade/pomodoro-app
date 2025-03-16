@@ -454,7 +454,7 @@ class PomodoroViewModel: ViewModel() {
             && _uiState.value.isTimerRunning){
             enableDoNotDisturb(context)
         } else {
-            disableDoNotDisturb(context)
+            if (_uiState.value.dndMode) { disableDoNotDisturb(context) }
         }
     }
     // Silent Mode
