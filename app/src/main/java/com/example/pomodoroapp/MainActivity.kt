@@ -90,7 +90,7 @@ class MainActivity : ComponentActivity() {
             pomodoroViewModel.updateSilentMode(LocalContext.current)
 
             // Timer Coroutine
-            LaunchedEffect(pomodoroUiState.isTimerRunning) {
+            LaunchedEffect(pomodoroUiState.isTimerRunning, pomodoroUiState.activateTimer) {
 
                 while ( Duration.parse(pomodoroUiState.timer).inWholeSeconds > 0L
                         && pomodoroUiState.isTimerRunning ) {
@@ -100,8 +100,8 @@ class MainActivity : ComponentActivity() {
                             pomodoroViewModel.playPreNotification(context = context)
                     }
 
-                    delay(1000L) // Wait 1 second
                     pomodoroViewModel.decreaseTimer(1)
+                    delay(1000L) // Wait 1 second
 
                 }
                 if( Duration.parse(pomodoroUiState.timer).inWholeSeconds <= 0L

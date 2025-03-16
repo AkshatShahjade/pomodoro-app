@@ -250,7 +250,8 @@ class PomodoroViewModel: ViewModel() {
             timerStage = nextTimerStage,
             timer = getSessionDuration(getTimerSessionType(nextTimerStage)),
             isTimerEnded = false,
-            isTimerRunning = true
+            isTimerRunning = true,
+            activateTimer = !_uiState.value.activateTimer
         ) }
         updateDndMode(context)
         updateSilentMode(context)
