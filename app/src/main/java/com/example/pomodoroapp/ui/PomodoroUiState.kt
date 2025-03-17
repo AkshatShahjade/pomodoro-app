@@ -7,6 +7,7 @@ import com.example.pomodoroapp.data.TimerProfile
 data class PomodoroUiState(
     val timer: String = "25m",
     val isTimerRunning: Boolean = false,
+    val activateTimer: Boolean = false,
     val isTimerEnded: Boolean = false,
     val timerProfile: TimerProfile = DataSource.timerProfileList[0],
     val timerStage: Int = 0,
