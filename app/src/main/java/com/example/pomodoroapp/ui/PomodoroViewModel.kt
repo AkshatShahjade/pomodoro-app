@@ -240,9 +240,9 @@ class PomodoroViewModel: ViewModel() {
         //Lets the Notification play for some time instead of immediately cancelling them
         viewModelScope.launch {
             delay(2000L)
-            stopSound()
-            stopVibration()
-            stopNotificationFlashLoop()
+            if (_uiState.value.notificationSoundOn) { stopSound() }
+            if (_uiState.value.notificationVibrationOn) { stopVibration() }
+            if (_uiState.value.notificationFlashOn) { stopNotificationFlashLoop() }
         }
 
         val nextTimerStage = _uiState.value.timerStage+delta
